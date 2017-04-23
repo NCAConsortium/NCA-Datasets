@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="ASCII"?>
+<!DOCTYPE nm:output SYSTEM "output.dtd">
+<output>
+<start_datetime>2016-11-21T11:28:38.534</start_datetime>
+<control_stream><![CDATA[
+;Model Desc: 2 CMT ORAL LINEAR W/ LAG
+;Project Name: NCAC SIMS Jin
+;Author: JK
+;QC: BM
+
+$PROB RUN# SIM JIN
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT TIME TAD DOSE AMT SS II DV MDV EVID CMT WT PAT
+
+$DATA JINRUN1REP1.csv IGNORE=@
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number
+; TIME: Actual Time Field
+; AMT:  Oral Dosage Amount Data Item (mg)
+; DV:   Dependent Variable (ng/mL)
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing)
+; ADDL: Number of additional doses given after the first
+; II:   Dosing Interval
+; WT:   Weight (kg)
+; PAT:  Patient Status (1=patient or 2=healthy volunteer)
+; DOSE: Dose given to the subject
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+
+$SUBROUTINE ADVAN4 TRANS4
+
+$PK
+ CLT=THETA(1) ; POPULATION CLEARANCE
+ IF (PAT.EQ.2) CLT=THETA(8)
+ QT=THETA(3)  ; POPULATION INTERCOMPARTMENTAL CLEARANCE
+ IF (PAT.EQ.2) QT=THETA(9)
+
+ FWT=WT
+; IF (ID.EQ.161) FWT=75
+; IF (ID.EQ.211) FWT=75
+; IF (ID.EQ.421) FWT=75
+; IF (ID.EQ.434) FWT=75
+; IF (ID.EQ.480) FWT=75
+ SWT=THETA(10)*LOG(FWT/75)
+
+ ; PK parameters
+ CL=EXP(CLT+SWT+ETA(1)) 		; INDIVIDUAL CLEARANCE
+ V2=EXP(THETA(2)+ETA(2)) 		; INDIVIDUAL VOLUME
+ Q=EXP(QT+ETA(3)) 				; INDIVIDUAL INTERCOMPARTMENTAL CLEARANCE
+ V3=EXP(THETA(4)+ETA(4)) 		; INDIVIDUAL PERIPHERAL VOLUME
+ KA=EXP(THETA(5)+ETA(5)) 		; INDIVIDUAL ABSORPTION RATE CONSTANT
+ ALAG1=EXP(THETA(6)+ETA(6)) 	; INDIVIDUAL LAG TIME
+ F1=EXP(THETA(7)*LOG(DOSE/150)) ; INDIVIDUAL INFLUENCE OF DOSE ON BIOAVAILABILITY
+
+ K=CL/V2
+ K23=Q/V2	
+ K32=Q/V3
+ S2=V2/1000						; SCALING FACTOR
+
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+  IPRED=F
+  IF(F.GT.0) THEN
+  IPRED=LOG(F)
+  ELSE
+  IPRED=0
+  ENDIF
+  Y=IPRED+EPS(1)
+  IRES=DV-IPRED
+  IWRES=IRES/IPRED
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+
+$THETA
+ (2.7)      ; CL (L/hr)
+ (3.12)     ; V2 (L)
+ (2.47)     ; Q  (L/hr)
+ (4.29)     ; V3 (L)
+ (-.729)  	; KA (1/hr)
+ (-1.398)   ; LAG (hr)
+ (-.262) 	; DOSE ON F1
+ (2.98) 	; CL HV
+ (2.06) 	; Q HV
+ (0.245) 	; BW on CL
+
+$OMEGA BLOCK(2)
+.146  				;IIV ON CL
+.112 .725 			;IIV ON V2
+$OMEGA BLOCK(2)
+.151 				;IIV ON Q
+.231 .538			;IIV ON V3
+$OMEGA .147 .207	;IIV ON KA AND LAG
+
+$SIGMA .286			; RESIDUAL ERROR
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+
+$SIM ONLYSIM (4621978)
+
+$TABLE ID TIME AMT DV EVID MDV WT PAT II DOSE PRED IRES IWRES IPRED
+       CL V2 Q V3 KA ALAG1 F1 ETA1 ETA2 ETA3 ETA4 ETA5 ETA5 ETA6
+       NOPRINT ONEHEADER FILE=sdtab
+]]></control_stream>
+<nmtran><![CDATA[
+]]></nmtran>
+<nonmem version='7.3.0'>
+<license_information><![CDATA[
+License Registered to: Quintiles
+Expiration Date:    14 OCT 2017
+Current Date:       21 NOV 2016
+Days until program expires : 328
+]]></license_information>
+<program_information><![CDATA[
+1NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM) VERSION 7.3.0
+ ORIGINALLY DEVELOPED BY STUART BEAL, LEWIS SHEINER, AND ALISON BOECKMANN
+ CURRENT DEVELOPERS ARE ROBERT BAUER, ICON DEVELOPMENT SOLUTIONS,
+ AND ALISON BOECKMANN. IMPLEMENTATION, EFFICIENCY, AND STANDARDIZATION
+ PERFORMED BY NOUS INFOSYSTEMS.
+]]></program_information>
+<problem number='1' subproblem='0' superproblem1='0' iteration1='0' superproblem2='0' iteration2='0'>
+<problem_title>RUN# SIM JIN</problem_title>
+<problem_information><![CDATA[
+
+ PROBLEM NO.:         1
+ RUN# SIM JIN
+0DATA CHECKOUT RUN:              NO
+ DATA SET LOCATED ON UNIT NO.:    2
+ THIS UNIT TO BE REWOUND:        NO
+ NO. OF DATA RECS IN DATA SET:     8832
+ NO. OF DATA ITEMS IN DATA SET:  15
+ ID DATA ITEM IS DATA ITEM NO.:   2
+ DEP VARIABLE IS DATA ITEM NO.:  10
+ MDV DATA ITEM IS DATA ITEM NO.: 11
+0INDICES PASSED TO SUBROUTINE PRED:
+  12   4   7   0   8   9  13   0   0   0   0
+0LABELS FOR DATA ITEMS:
+ C ID TRT TIME TAD DOSE AMT SS II DV MDV EVID CMT WT PAT
+0(NONBLANK) LABELS FOR PRED-DEFINED ITEMS:
+ CL V2 Q V3 KA ALAG1 F1 IPRED IRES IWRES
+0FORMAT FOR DATA:
+ (E2.0,E4.0,E2.0,2E3.0,2E4.0,6E2.0,E7.0,E2.0)
+
+ TOT. NO. OF OBS RECS:     8096
+ TOT. NO. OF INDIVIDUALS:    736
+0LENGTH OF THETA:  10
+0DEFAULT THETA BOUNDARY TEST OMITTED:    NO
+0OMEGA HAS BLOCK FORM:
+  1
+  1  1
+  0  0  2
+  0  0  2  2
+  0  0  0  0  3
+  0  0  0  0  0  4
+0DEFAULT OMEGA BOUNDARY TEST OMITTED:    NO
+0SIGMA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:   1
+0DEFAULT SIGMA BOUNDARY TEST OMITTED:    NO
+0INITIAL ESTIMATE OF THETA:
+   0.2700E+01  0.3120E+01  0.2470E+01  0.4290E+01 -0.7290E+00 -0.1398E+01 -0.2620E+00  0.2980E+01  0.2060E+01  0.2450E+00
+0INITIAL ESTIMATE OF OMEGA:
+ BLOCK SET NO.   BLOCK                                                                    FIXED
+        1                                                                                   NO
+                  0.1460E+00
+                  0.1120E+00   0.7250E+00
+        2                                                                                   NO
+                  0.1510E+00
+                  0.2310E+00   0.5380E+00
+        3                                                                                   NO
+                  0.1470E+00
+        4                                                                                   NO
+                  0.2070E+00
+0INITIAL ESTIMATE OF SIGMA:
+ 0.2860E+00
+0SIMULATION STEP OMITTED:    NO
+ OBJ FUNC EVALUATED:         NO
+0SIMULATION RANDOM METHOD SELECTED (RANMETHOD): DEFAULT
+ SOURCE   1:
+   SEED1:       4621978   SEED2:             0   PSEUDO-NORMAL
+0TABLES STEP OMITTED:    NO
+ NO. OF TABLES:           1
+ SEED NUMBER (SEED):    11456
+ RANMETHOD:
+ MC SAMPLES (ESEED):    300
+ WRES SQUARE ROOT TYPE:            EIGENVALUE
+0-- TABLE   1 --
+ PRINTED:                NO
+ HEADERS:               ONE
+ FILE TO BE FORWARDED:   NO
+ FORMAT:                S1PE11.4
+ LFORMAT:
+ RFORMAT:
+0USER-CHOSEN ITEMS:
+ ID TIME AMT DV EVID MDV WT PAT II DOSE IRES IWRES IPRED CL V2 Q V3 KA ALAG1 F1 ETA1 ETA2 ETA3 ETA4 ETA5 ETA5 ETA6
+1DOUBLE PRECISION PREDPP VERSION 7.3.0
+
+ TWO COMPARTMENT MODEL WITH FIRST-ORDER ABSORPTION (ADVAN4)
+0MAXIMUM NO. OF BASIC PK PARAMETERS:   5
+0BASIC PK PARAMETERS (AFTER TRANSLATION):
+   BASIC PK PARAMETER NO.  1: ELIMINATION RATE (K)
+   BASIC PK PARAMETER NO.  2: CENTRAL-TO-PERIPH. RATE (K23)
+   BASIC PK PARAMETER NO.  3: PERIPH.-TO-CENTRAL RATE (K32)
+   BASIC PK PARAMETER NO.  5: ABSORPTION RATE (KA)
+ TRANSLATOR WILL CONVERT PARAMETERS
+ CL, V2, Q, V3 TO K, K23, K32 (TRANS4)
+0COMPARTMENT ATTRIBUTES
+ COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                         STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+    1         DEPOT        OFF        YES        YES        YES        NO
+    2         CENTRAL      ON         NO         YES        NO         YES
+    3         PERIPH.      ON         NO         YES        NO         NO
+    4         OUTPUT       OFF        YES        NO         NO         NO
+1
+ ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+ COMPT. NO.                             INDICES
+              SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                         FRACTION    RATE        DURATION    LAG
+    1            *           7           *           *           6
+    2            8           *           *           *           *
+    3            *           *           *           *           *
+    4            *           -           -           -           -
+             - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+             * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+               WILL DEFAULT TO ONE IF APPLICABLE
+0DATA ITEM INDICES USED BY PRED ARE:
+   EVENT ID DATA ITEM IS DATA ITEM NO.:     12
+   TIME DATA ITEM IS DATA ITEM NO.:          4
+   DOSE AMOUNT DATA ITEM IS DATA ITEM NO.:   7
+   STEADY STATE DATA ITEM IS DATA ITEM NO.:  8
+   INTERVAL DATA ITEM IS DATA ITEM NO.:      9
+   COMPT. NO. DATA ITEM IS DATA ITEM NO.:   13
+
+0PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+ PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+0ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+]]></problem_information>
+<simulation_information><![CDATA[
+1
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:      14432514   SEED2:             0
+]]></simulation_information>
+<estimation number='1' type='1'>
+<table_series>0</table_series>
+</estimation>
+</problem>
+</nonmem>
+<stop_datetime>2016-11-21T11:28:44.593</stop_datetime>
+<total_cputime>5.672</total_cputime>
+</output>

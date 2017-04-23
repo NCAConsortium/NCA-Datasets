@@ -1,0 +1,86 @@
+
+*************************************************************************
+*************************************************************************
+          CREATE SIMULATION DATASET REPORT 2017-01-18-17-06-38
+*************************************************************************
+*************************************************************************
+
+	Save Filename:                WuRun1
+	N Subjects:                   45
+	N Obs / Subject:              10
+	Total Sampling Time:          336
+	Sampling Times:               1, 3, 5, 7, 24, 48, 72, 96, 168, 336
+	Vary Sampling Times By:       0
+	Treatment Assignment:         1
+	N Doses:                      1
+	Dose Amount:                  2.5
+	Dose Timing:                  SEQUENTIAL
+	Steady-State:                 FALSE
+	Dosing Interval:              0
+	Dosage Administration:        IV
+	CMT Model:                    1
+	Covariate Source:             DISTRIBUTION
+	Re-Sampling Filename:         
+	Covariate Names:              WT
+	Continuous Covariates:        BSA
+	Mean Covariate Values:        1.91
+	SD Covariate Values:          0.3
+	Categorical Covariates:       LT
+	Categorical Levels:           2
+	Categorical Probabilities:    0.5
+	Covariate for Dose Adjustment:BSA
+	Infusion Duration:            1
+	Flag Name(s):                 
+	Flag Equation(s):             
+	Number of Replicates:         1
+	File Extension:               .csv
+	Create Zip File:              FALSE
+	Randomization Seed(s):        20170118
+	Time Rounding Precision:      3
+	Covariate Rounding Precision: 2
+	Output Path:                  C:/Users/q831301/Desktop
+
+*************************************************************************
+
+  WuRun1REP1.csv Created.
+
+  Completed creation of the NONMEM simulation datasets!
+
+*************************************************************************
+
+
+
+  ------------------------------------------------------------------  
+  *** REMEMBER TO ADD THIS TO THE NONMEM SIMULATION CONTROL FILE ***  
+  ------------------------------------------------------------------  
+  $INPUT C ID TRT TIME TAD DOSE AMT DUR RATE SS II DV MDV EVID CMT BSA LT  
+  $THETA   
+     7.5 FIX  
+     55 FIX    
+     0.33 FIX ...
+
+  $OMEGA  
+     0.1 FIX ...
+
+  $OMEGA BLOCK (2)  
+     0.1 FIX ...  
+     0.01  
+     0.2 ...
+
+  $SIGMA  
+     0.02 FIX ...
+
+  $SIMULATION (XXXXXXX) ONLYSIMULATION
+
+  $TABLE ID TRT TIME TAD IPRE MDV DV ...   
+         NOPRINT ONEHEADER FILE=FTABLE
+
+  -----------------------------------------------------------------
+
+  *NOTICE* Only use the FIRSTONLY option in a Table statement
+
+                            wanting a !
+
+
+  -----------------------------------------------------------------
+

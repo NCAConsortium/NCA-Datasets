@@ -1,0 +1,683 @@
+> create.simulation.dataset(save.filename.as = Jonsson, n.subjects = 75, n.obs.per.subject = 7, total.sampling.time = 48, sample.times = 1,2,8,12,24,36,48, vary.sample.times.by = 0.05, trt = 1, n.doses = 1, dose.amount = 2270, dose.timing = SEQUENTIAL, steady.state = FALSE, dosing.interval = 0, dosage.administration = IV, cmt.model = 2, covariate.source = DISTRIBUTION, resampling.filename = , cov.names = WT, cont.covariates = WTKG,CRCL, mean.cov.values = 77,71, SD.cov.values = 14.8,10, cat.covariates = , cat.levels = , cat.probs = , cov.to.dose.adj = , infusion.duration = 1, flag.names = , flag.eqs = , n.replicates = 1, file.extension = .csv, create.zip.file = FALSE, seed = 20170118, time.rounding.precision = 3, cov.rounding.precision = 2, outputpath = C:/Users/q831301/Desktop, overwrite.prompt = 0, close.report = 0)
+
+function(save.filename.as,
+                                       n.subjects = 1000,
+                                       n.obs.per.subject = 249,
+                                       total.sampling.time = 24,
+                                       sample.times = "<AUTO>",
+                                       vary.sample.times.by = 0,
+                                       trt = 1,
+                                       n.doses = 1,
+                                       dose.amount = 100,
+                                       dose.timing = c("SEQUENTIAL", "SIMULTANEOUS"),
+                                       steady.state = FALSE,
+                                       dosing.interval = NULL,
+                                       dosage.administration = c("EXTRAVASCULAR", "IV"),
+                                       infusion.duration = NULL,
+                                       cmt.model = 1,
+                                       covariate.source = c("NONE","DISTRIBUTION", "RESAMPLING"),
+                                       resampling.filename = NULL,
+                                       cov.names = "<NONE>",
+                                       cont.covariates = NULL,
+                                       mean.cov.values = 1,
+                                       SD.cov.values = 0.1,
+                                       cat.covariates = NULL,
+                                       cat.levels = 2,
+                                       cat.probs = 0.5,
+                                       cov.to.dose.adj = NULL,
+                                       flag.names = NULL,
+                                       flag.eqs = NULL,
+                                       n.replicates = 1,
+                                       file.extension = ".csv",
+                                       create.zip.file = FALSE,
+                                       seed = as.numeric(format(Sys.time(), format = "%Y%m%d")),
+                                       time.rounding.precision = 3,
+                                       cov.rounding.precision = 2,
+                                       outputpath = getwd(),
+                                       overwrite.prompt = F,
+                                       close.report = F)
+{
+
+  #  create.simulation.dataset ("200 mg TID Simulation Dataset", n.subjects=1000, n.obs.per.subject=250, n.doses=1, dose.amount=200000, dose.timing="SEQUENTIAL", steady.state=F, dosing.interval=NULL, dosage.administration="EXTRAVASCULAR", cmt.model=2, cov.names <- c("FRML", "DOSE"), cont.covariates <- c(F, F), mean.cov.values <- c(1, 200), SD.cov.values <- c(0, 0))
+  #
+   # save.filename.as <- "Simulation.Dataset"
+   # n.subjects <- 10
+   # n.obs.per.subject <- 24
+   # total.sampling.time <- 24
+   # sample.times <- "<AUTO>"
+   # sample.times <- c(0.1667, 0.5, 1, 3, 6, 9, 24, 48, 72, 96)
+   # sample.times <- "0, 0.0625, 2, 3, 5, 8, 15, 22, 106, 106.0625, 107, 108, 110, 113, 120, 127"
+   # n.doses <- 1
+   # dose.amount <- 50
+   # dose.amount <- "100, 200"
+   # dose.timing <- "SEQUENTIAL"
+   # steady.state <- F
+   # dosing.interval <- 24
+   # dosing.interval <- "<NONE>"
+   # dosing.interval <- NULL
+   # dosage.administration <- "EXTRAVASCULAR"
+   # dosage.administration <- "IV"
+   # cmt.model <- 2
+   # covariate.source <- "DISTRIBUTION"
+   # covariate.source <- "RESAMPLING"
+   # resampling.filename <- NULL
+   # resampling.filename <- "F8findatav0cov_all_BLQ.csv"
+   # cov.names <- "<NONE>"
+   # cov.names <- c("OCC", "AGE", "WT", "VWF")
+   # cont.covariates <- "WT, AGE"
+   # mean.cov.values <- "70, 50"
+   # SD.cov.values <- "10, 5"
+   # cov.to.dose.adj <- NULL
+   # cov.to.dose.adj <- "WT"
+   # infusion.duration <- NULL
+   # infusion.duration <- 0.1667
+   # flag.names <- NULL
+   # flag.names <- c("SMP1", "SMP2", "SMP3", "SMP4")
+   # flag.eqs <- NULL
+   # flag.eqs <- c("TAD==0.1667|TAD==48", "TAD==0.1667|TAD==24|TAD==48", "TAD==0.5|TAD==48", "TAD==0.5|TAD==24|TAD==48")
+   # n.replicates <- 1
+   # seed <- as.numeric(format(Sys.time(), format="%Y%m%d"))
+   # seed <- 20150501
+   # time.rounding.precision <- 4
+   # cov.rounding.precision <- 2
+   # outputpath <- getwd()
+   # getwd()
+   # setwd("E:/Data/For Testing/Simulation")
+   # cat.covariates = NULL
+   # cat.levels = 2
+   # cat.probs = 0.5
+
+
+  # save.filename.as <- "Simulation.Dataset"
+  # n.subjects <- 10
+  # n.obs.per.subject <- 12
+  # total.sampling.time <- 24
+  # sample.times <- "<AUTO>"
+  # n.doses <- 1
+  # dose.amount <- 50
+  # dose.timing <- "SEQUENTIAL"
+  # steady.state <- F
+  # dosing.interval <- NA
+  # dosage.administration <- "IV"
+  # cmt.model <- 2
+  # covariate.source <- "NONE"
+  # flag.names <- NULL
+  # # flag.names <- c("SMP1", "SMP2", "SMP3", "SMP4")
+  # flag.eqs <- NULL
+  # # flag.eqs <- c("TAD==0.1667|TAD==48", "TAD==0.1667|TAD==24|TAD==48", "TAD==0.5|TAD==48", "TAD==0.5|TAD==24|TAD==48")
+  # n.replicates <- 1
+  # seed <- as.numeric(format(Sys.time(), format="%Y%m%d"))
+  # seed <- 20150501
+  # time.rounding.precision <- 4
+  # cov.rounding.precision <- 2
+  # outputpath <- getwd()
+  # getwd()
+  # setwd("E:/Data/For Testing/Simulation")
+
+  # Match Arguments
+  dose.timing <- match.arg(dose.timing)
+  dosage.administration <- match.arg(dosage.administration)
+  covariate.source <- match.arg(covariate.source)
+  save.filename.as <- gsub("\\.", "", make.names(save.filename.as, allow_ = FALSE))
+
+  # Match NULLs
+
+  if(!is.null(dosing.interval)) {
+    if(length(dosing.interval) == 0) {dosing.interval <- 0}
+    else if(is.na(dosing.interval)) {dosing.interval <- 0}
+    else(if(nchar(dosing.interval) == 0) {dosing.interval <- 0})
+  } else {dosing.interval <- 0}
+
+  if(!is.null(infusion.duration)) {
+    if(length(infusion.duration) == 0) {infusion.duration <- NULL}
+    else{
+      if(nchar(infusion.duration) == 0) {infusion.duration <- NULL}
+        else{
+          infusion.duration <- as.numeric(infusion.duration)
+          if(infusion.duration == 0) {infusion.duration <- NULL} # Cannot divide by zero.  NONMEM will treat as a bolus.
+        }
+    }
+  } else {infusion.duration <- 0}
+
+  if(!is.null(resampling.filename)) {
+    if(length(resampling.filename) == 0) {resampling.filename <- NULL}
+    else(if(nchar(resampling.filename[1]) == 0) {resampling.filename <- NULL})
+  }
+  if(!is.null(cov.names)) {
+    if(length(cov.names) == 0) {cov.names <- NULL}
+    else(if(nchar(cov.names[1]) == 0) {cov.names <- NULL})
+  }
+  if(!is.null(flag.names)) {
+    if(length(flag.names) == 0) {flag.names <- NULL}
+    else(if(nchar(flag.names[1]) == 0) {flag.names <- NULL})
+  }
+  if(!is.null(flag.eqs)) {
+    if(length(flag.eqs) == 0) {flag.eqs <- NULL}
+    else(if(nchar(flag.eqs[1]) == 0) {flag.eqs <- NULL})
+  }
+  if(!is.null(seed)) {
+    if(length(seed) == 0) {seed <- NULL}
+    else(if(nchar(seed[1]) == 0) {seed <- NULL})
+  }
+  if(!is.null(cov.to.dose.adj)) {if(cov.to.dose.adj == "") {cov.to.dose.adj = NULL}}
+  if(!is.null(cont.covariates)) {if(cont.covariates == "") {cont.covariates = NULL}}
+  if(!is.null(cat.covariates)) {if(cat.covariates == "") {cat.covariates = NULL}}
+
+
+  # Checkout Inputs
+  if(!is.numeric(n.subjects)) {stop("n.subjects is not a numeric number")}
+  if(!is.numeric(n.obs.per.subject)) {stop("n.obs.per.subject is not a numeric number")}
+  if(!is.numeric(total.sampling.time)) {stop("total.sampling.time is not a numeric number")}
+  if(!is.numeric(n.doses)) {stop("n.doses is not a numeric number")}
+  if(dose.timing != "SEQUENTIAL" & dose.timing != "SIMULTANEOUS") {stop("dose.timing is not a recognized value")}
+  if(!is.logical(steady.state)) {stop("steady.state is not a logical value")}
+  if(steady.state == T & is.null(dosing.interval)) {stop('steady.state=T and dose.interval=NULL is not a viable combination')}
+  if(dosage.administration != "EXTRAVASCULAR" & dosage.administration != "IV") {stop("dosage.administration is not a recognized value")}
+  if(!is.numeric(cmt.model)) {stop("cmt.model is not a numeric number")}
+  if(!is.element(covariate.source, c("NONE", "DISTRIBUTION", "RESAMPLING"))) {stop("covariate.source must be specified as either 'DISTRIBUTION' or 'RESAMPLING'.")}
+  if(length(flag.names) != length(flag.eqs)) {stop("flag.names argument is not the same length as flag.eqs.")}
+  if(!is.null(seed) & !is.numeric(seed)) {stop("seed argument must either be NULL or numeric.")}
+
+  # Internal Functions
+  zip <- function (zipfile, files, flags = "-r9X", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip")) {
+    if (missing(flags) && (!is.character(files) || !length(files)))
+      stop("'files' must a character vector specifying one or more filepaths")
+    args <- c(flags, shQuote(path.expand(zipfile)), shQuote(files),
+              extras)
+    if (.Platform$OS.type == "windows")
+      invisible(system2(zip, args, stdout = NULL, invisible = TRUE))
+    else invisible(system2(zip, args))
+  }
+
+
+
+  # Report Start Prep
+  TD <- as.character(format(Sys.time(), format="%Y-%m-%d-%H-%M-%S"))
+  TD.P <- as.character(format(Sys.time(), format="%Y.%m.%d.%H.%M.%S"))
+  report.filename <- paste("create.simulation.dataset.report.", TD.P, ".rtf", sep="")
+  script.filename <- paste("create.simulation.dataset.script.", TD.P, ".rtf", sep="")
+
+  sink(file.path(outputpath, report.filename), T)
+
+  cat(paste("\n*************************************************************************", sep = ""))
+  cat(paste("\n*************************************************************************", sep = ""))
+  cat(paste("\n          CREATE SIMULATION DATASET REPORT ", TD, sep = ""))
+  cat(paste("\n*************************************************************************", sep = ""))
+  cat(paste("\n*************************************************************************\n", sep = ""))
+
+  #  Reporting
+  cat(paste("\n",
+            "\tSave Filename:                ", save.filename.as, "\n",
+            "\tN Subjects:                   ", n.subjects, "\n",
+            "\tN Obs / Subject:              ", n.obs.per.subject, "\n",
+            "\tTotal Sampling Time:          ", total.sampling.time, "\n",
+            "\tSampling Times:               ", paste(sample.times, collapse = ","), "\n",
+            "\tVary Sampling Times By:       ", vary.sample.times.by, "\n",
+            "\tTreatment Assignment:         ", trt, "\n",
+            "\tN Doses:                      ", n.doses, "\n",
+            "\tDose Amount:                  ", paste(dose.amount, collapse = ","), "\n",
+            "\tDose Timing:                  ", dose.timing, "\n",
+            "\tSteady-State:                 ", steady.state, "\n",
+            "\tDosing Interval:              ", paste(dosing.interval, collapse = ","), "\n",
+            "\tDosage Administration:        ", dosage.administration, "\n",
+            "\tCMT Model:                    ", cmt.model, "\n",
+            "\tCovariate Source:             ", covariate.source, "\n",
+            "\tRe-Sampling Filename:         ", resampling.filename, "\n",
+            "\tCovariate Names:              ", paste(cov.names, collapse=","), "\n",
+            "\tContinuous Covariates:        ", paste(cont.covariates, collapse = ","), "\n",
+            "\tMean Covariate Values:        ", paste(mean.cov.values, collapse = ","), "\n",
+            "\tSD Covariate Values:          ", paste(SD.cov.values, collapse = ","), "\n",
+            "\tCategorical Covariates:       ", paste(cat.covariates, collapse = ","), "\n",
+            "\tCategorical Levels:           ", paste(cat.levels, collapse = ","), "\n",
+            "\tCategorical Probabilities:    ", paste(cat.probs, collapse = ","), "\n",
+            "\tCovariate for Dose Adjustment:", cov.to.dose.adj, "\n",
+            "\tInfusion Duration:            ", infusion.duration, "\n",
+            "\tFlag Name(s):                 ", paste(flag.names, collapse=","), "\n",
+            "\tFlag Equation(s):             ", paste(flag.eqs, collapse=",\n\t\t\t\t\t\t"), "\n",
+            "\tNumber of Replicates:         ", n.replicates, "\n",
+            "\tFile Extension:               ", file.extension, "\n",
+            "\tCreate Zip File:              ", create.zip.file, "\n",
+            "\tRandomization Seed(s):        ", seed, "\n",
+            "\tTime Rounding Precision:      ", time.rounding.precision, "\n",
+            "\tCovariate Rounding Precision: ", paste(cov.rounding.precision, collapse=","), "\n",
+            "\tOutput Path:                  ", outputpath, "\n", sep = ""))
+
+  cat(paste("\n*************************************************************************\n", sep = ""))
+
+  sink()
+
+  ############################
+  #      Dataset Prep        #
+  ############################
+
+  # TIME and TAD
+  # seed <- as.numeric(format(Sys.time(), format="%Y%m%d"))
+  # sample.times <- "<AUTO>"
+  # n.obs.per.subject <- 249
+  # n.doses <- 4
+  # dosing.interval <- c(24, 24, 48, 48)
+  # total.sampling.time <- 48*4
+  # ii <- 24
+  # n.replicates <- 1
+
+  # Randomization Seed Prep
+  set.seed(seed)
+  # Need to be able to generate multiple datasets (ie, replicates) based upon a vector of seed values
+  {if (length(seed) == as.numeric(n.replicates)) {r.seeds <- as.numeric(seed)}
+     else{
+       r.seeds <- as.integer(runif(as.numeric(n.replicates), 0, max = 1000000000))
+     }
+  }
+
+  # Create Progress Bar
+  if(n.replicates >= 1)
+  progress.total <- 100
+  pb <- winProgressBar(title = paste("Creating Replicate ", 0, " of Simulation Dataset (0 % Complete)", sep=""), min = 0, max = progress.total, width = 400)
+  setWinProgressBar(pb, 0, title=paste("Creating Replicate ", 0, " of Simulation Dataset (0% Complete)", sep=""))
+  flush.console()
+
+  # Replicate Loop
+  for (r in 1:n.replicates) {
+
+    # Update Progress Bar
+    progress.proportion <- r/n.replicates
+    setWinProgressBar(pb, round(progress.proportion*progress.total,0), title=paste("Creating Replicate ", r, " of Simulation Dataset (", round(progress.proportion*progress.total, 0),  "% Complete)", sep=""))
+    flush.console()
+
+    set.seed(r.seeds[r])
+
+    {if(dosing.interval==0) {
+      ii <- as.numeric(total.sampling.time)
+    }
+    else (ii <- as.numeric(dosing.interval))}
+
+    if(sample.times[1] == "<AUTO>") {
+      {if(length(dosing.interval)==1){
+        # all.times <- c((0:(n.obs.per.subject - 1)/(n.obs.per.subject - 1)) * total.sampling.time, (1:as.numeric(n.doses)) * ii - ii)
+        all.times <- c((0:(n.obs.per.subject)/(n.obs.per.subject)) * total.sampling.time, (1:as.numeric(n.doses)) * ii - ii)
+        all.times <- all.times[2:length(all.times)]
+      }
+      else{
+        if(n.doses!=length(dosing.interval)) {stop("Length of dosing.interval does not equal the number of doses (n.doses).")}
+        # all.times <- c((0:(n.obs.per.subject - 1)/(n.obs.per.subject - 1)) * total.sampling.time, cumsum(ii)-ii)
+        all.times <- c((0:(n.obs.per.subject)/(n.obs.per.subject)) * total.sampling.time, cumsum(ii)-ii)
+      }}
+    }
+    if(sample.times[1] != "<AUTO>") {
+      if(is.character(sample.times)) {sample.times <- as.numeric(unlist(strsplit(gsub(" ", "", sample.times), ",")))}
+      n.obs.per.subject <- length(sample.times)
+      {if(length(dosing.interval)==1){
+        all.times <- c(sample.times, (1:as.numeric(n.doses)) * ii - ii)
+      }
+      else {
+        if(n.doses!=length(dosing.interval)) {stop("Length of dosing.interval does not equal the number of doses (n.doses).")}
+        all.times <- c(sample.times, cumsum(ii)-ii)
+      }}
+    }
+
+    # Setup
+    recs.per.subject <- n.obs.per.subject + n.doses
+    {if(cov.names[1] != "<NONE>") {
+      if(covariate.source == "DISTRIBUTION") {
+        # cov.names <- c(cont.covariates, cat.covariates) ###- this is an issue
+        # sim.file <- as.data.frame(matrix(data = NA, nrow = recs.per.subject * n.subjects, ncol = 13 + length(cov.names)))
+        # names(sim.file) <- c("ID", "TRT", "TIME", "TAD", "DOSE", "AMT", "SS", "II", "DV", "MDV", "EVID", "CMT", cov.names, "dose.rec")
+        sim.file <- as.data.frame(matrix(data = NA, nrow = recs.per.subject * n.subjects, ncol = 14))
+        names(sim.file) <- c("C", "ID", "TRT", "TIME", "TAD", "DOSE", "AMT", "SS", "II", "DV", "MDV", "EVID", "CMT", "dose.rec")
+      }
+      if(covariate.source == "RESAMPLING"){
+        sim.file <- as.data.frame(matrix(data = NA, nrow = recs.per.subject * n.subjects, ncol = 14 + length(cov.names)))
+        names(sim.file) <- c("C", "ID", "TRT", "TIME", "TAD", "DOSE", "AMT", "SS", "II", "DV", "MDV", "EVID", "CMT", cov.names, "dose.rec")}
+    }
+    else {
+      sim.file <- as.data.frame(matrix(data = NA, nrow = recs.per.subject * n.subjects, ncol = 14))
+      names(sim.file) <- c("C", "ID", "TRT", "TIME", "TAD", "DOSE", "AMT", "SS", "II", "DV", "MDV", "EVID", "CMT", "dose.rec")
+    }}
+    # Comment column
+    sim.file$C = rep(NA, n.subjects * recs.per.subject)
+
+    # IDs
+    sim.file$ID <- rep(1:n.subjects, each = recs.per.subject)
+
+    # TRT
+    sim.file$TRT <- trt
+
+    # AMT
+    # dose.amount <- "100"
+    # dose.amount <- 50
+    # dose.amount <- "50, 100, 150, 200, 200"
+    # dose.amount <- c(50, 100, 150, 200, 200)
+    {if(is.character(dose.amount)) {eval(parse(text = paste("admin.doses <- c(", dose.amount, ")", sep = "")))}
+      else{admin.doses <- dose.amount}}
+    {if(n.doses/length(admin.doses) != as.integer(n.doses/length(admin.doses))) {
+      stop("\n\n *** WARNING *** Number of doses is not divisible into the number of doses!")
+    }
+    else {
+      total.admin.doses <- vector()
+      for(dose.level in admin.doses) {
+        total.admin.doses <- append(total.admin.doses, rep(dose.level, n.doses/length(admin.doses)), after = length(total.admin.doses))
+      }
+    }}
+
+    dose.times <- c(rep(NA, (n.obs.per.subject)), ((1:n.doses) * ii) - ii)
+    amts <- c(rep(NA, (n.obs.per.subject)), total.admin.doses)
+    dose <- amts
+    tad <- rep(NA, length(amts))
+
+    # Fill Dataset
+    times <- data.frame(dose.times, all.times, tad, amts, dose)
+    times <- times[ order(times[,"all.times"], times[,"dose.times"]), ]
+    #  times <- sort.col(times, "@ALL", c(2, 1), ascending = T)
+    row.names(times) <- 1:nrow(times)
+    times[,"dose.times"][!is.na(times$dose.times)] <- 0
+    for(i in 1:nrow(times)) {
+      # i <- 3
+      if(!is.na(times[i, "dose.times"])) {
+        times[i, "tad"] <- 0
+        run.dose.time <- times[i, "all.times"]
+      }
+      else {
+        times[i, "tad"] <- times[i, "all.times"] - run.dose.time
+        times[i, "dose"] <- times[(i-1), "dose"]
+      }
+    }
+
+    # Write to Sim File
+    sim.file$dose.rec <- rep(times$dose.times, times = n.subjects)
+    sim.file$TIME <- rep(times$all.times, times = n.subjects)
+    sim.file$TAD <- rep(times$tad, times = n.subjects)
+    sim.file$AMT <- rep(times$amts, times = n.subjects)
+    sim.file$DOSE <- rep(times$dose, times = n.subjects)
+
+    # AMT
+    # sim.file$AMT[sim.file$dose.rec==0] <- dose.amount
+    # Need to propagate forward if sequential and length(dose.amounts)>1
+
+    # SS
+    if(steady.state == FALSE) {
+      sim.file$SS[sim.file$dose.rec == 0] <- 0
+    }
+    if(steady.state == TRUE) {
+      sim.file$SS[sim.file$dose.rec == 0] <- 1
+    }
+
+    # II
+    {if(!(dosing.interval == 0)) {
+      if(steady.state == TRUE) {
+        sim.file$II[sim.file$dose.rec == 0] <- dosing.interval
+      }
+      else (sim.file$II[sim.file$dose.rec == 0] <- 0)
+    }}
+
+    # MDV
+    sim.file$MDV[sim.file$dose.rec == 0] <- 1
+    sim.file$MDV[is.na(sim.file$dose.rec)] <- 0
+
+    # EVID
+    sim.file$EVID[sim.file$AMT > 0] <- 1
+    sim.file$EVID[is.na(sim.file$AMT)] <- 0
+
+    # CMT
+    if(dosage.administration == "EXTRAVASCULAR") {
+      sim.file$CMT[sim.file$AMT > 0] <- 1
+      sim.file$CMT[is.na(sim.file$AMT)] <- 2
+    }
+    if(dosage.administration == "IV") {
+      sim.file$CMT[sim.file$AMT > 0] <- 1
+      sim.file$CMT[is.na(sim.file$AMT)] <- 1
+    }
+
+    # COVS
+    if(covariate.source == "DISTRIBUTION") {
+      if(!is.null(cont.covariates)) {
+        if(is.character(cont.covariates)) {cont.covariates <- unlist(strsplit(gsub(" ", "", cont.covariates), ","))}
+        if(is.character(mean.cov.values)) {mean.cov.values <- as.numeric(unlist(strsplit(gsub(" ", "", mean.cov.values), ",")))}
+        if(is.character(SD.cov.values)) {SD.cov.values <- as.numeric(unlist(strsplit(gsub(" ", "", SD.cov.values), ",")))}
+        if(length(cont.covariates) != length(mean.cov.values)) {stop("Length of mean.cov.values must be the same as cont.covariates!")}
+        if(length(cont.covariates) != length(SD.cov.values)) {stop("Length of mean.cov.values must be the same as cont.covariates!")}
+          for(i in 1:length(cont.covariates)) {
+            cov.values <- round(rnorm(n.subjects, mean.cov.values[i], SD.cov.values[i]), cov.rounding.precision)
+            sim.file[, cont.covariates[i]] <- rep(cov.values, each = recs.per.subject)
+          }
+      }
+
+
+      if(!is.null(cat.covariates)) {
+        if(is.character(cat.covariates)) {cat.covariates <- unlist(strsplit(gsub(" ", "", cat.covariates), ","))}
+        if(is.character(cat.levels)) {cat.levels <- as.numeric(unlist(strsplit(gsub(" ", "", cat.levels), ",")))}
+        if(is.character(cat.probs)) {cat.probs <- as.numeric(unlist(strsplit(gsub(" ", "", cat.probs), ",")))}
+        if(length(cat.covariates) != length(cat.levels)) {stop("Length of cat.levels must be the same as cat.covariates!")}
+        if(length(cat.covariates) != length(cat.probs)) {stop("Length of cat.probs must be the same as cat.covariates!")}
+        for(i in 1:length(cat.covariates)) {
+          cov.values <- rbinom(n.subjects, cat.levels[i]-1, cat.probs[i])
+          sim.file[, cat.covariates[i]] <- rep(cov.values, each = recs.per.subject)
+        }
+      }
+
+    }
+
+    if(covariate.source == "RESAMPLING"){
+      if(!is.null(cov.names)) {
+        # cov.names <- c("OCC", "AGE", "WT", "VWF")
+        # getwd()
+        rsamp.data <- read.csv(resampling.filename)
+        if(any(!is.element(cov.names, names(rsamp.data)))) {stop(paste("Unable to locate ", paste(cov.names[!is.element(cov.names, names(rsamp.data))], collapse=" & "), " covariate variable(s) in re-sampling dataset.", sep=""))}
+        if(!is.element("ID", names(rsamp.data))) {stop("Unable to locate ID variable in re-sampling dataset.")}
+        if(!is.na(match("C", names(rsamp.data)))) {rsamp.data <- subset(rsamp.data, c(rsamp.data$C==".", rsamp.data$C==""))}
+        rsamp.data$FIRST <- rep(0, times=nrow(rsamp.data))
+        rsamp.data$FIRST[!duplicated(rsamp.data$ID)] <- 1
+        rsamp.data <- rsamp.data[rsamp.data$FIRST==1,]
+        sim.file[, c("XID", cov.names)]<- rsamp.data[rep(match(sample(rsamp.data$ID, size=n.subjects, replace=TRUE), rsamp.data$ID),each=recs.per.subject), c("ID", cov.names)]
+      }
+      else(warning("No resampled covariates were generated."))
+    }
+
+    # Covariate Dose Adjustment
+    if(covariate.source == "DISTRIBUTION" | covariate.source == "RESAMPLING"){
+      if(!is.null(cov.to.dose.adj)) {
+        if(length(cov.to.dose.adj)>1) {warning("*** WARNING *** Only the first cov.to.dose.adj will be used.")}
+        sim.file[!is.na(sim.file$AMT), "AMT"] <- sim.file[!is.na(sim.file$AMT), "DOSE"] * sim.file[!is.na(sim.file$AMT), cov.to.dose.adj]
+      }
+    }
+
+
+    # Infusion Duration
+    if(!is.null(infusion.duration)) {
+      if(infusion.duration > 0) { # Should generally be positive so we are not dividing through by zero
+      #infusion.duration <- rep(0.016607, times = 4)
+      # signif(infusion.duration, 4)
+      id.n.signif <- max(nchar(gsub("^[0]+", "", gsub("\\,", "", gsub("\\.", "", as.character(as.numeric(infusion.duration)))))))
+      amt.n.signif <- max(nchar(gsub("^[0]+", "", gsub("\\,", "", gsub("\\.", "", as.character(as.numeric(sim.file$AMT)))))))
+      n.signif <- id.n.signif
+      if(amt.n.signif<id.n.signif) n.signif <- amt.n.signif
+      sim.file$DUR <- rep(NA, times=nrow(sim.file))
+      sim.file$RATE <- rep(NA, times=nrow(sim.file))
+      sim.file[!is.na(sim.file$AMT), "DUR"] <- infusion.duration
+      sim.file[!is.na(sim.file$AMT), "RATE"] <- signif(sim.file[!is.na(sim.file$AMT), "AMT"]/sim.file[!is.na(sim.file$AMT), "DUR"], n.signif)
+      sim.file <- sim.file[,names(sim.file)[c(1:match("AMT", names(sim.file)), match("DUR", names(sim.file)):match("RATE", names(sim.file)), (match("AMT", names(sim.file))+1):(length(names(sim.file))-2))]]
+      }
+      if(infusion.duration < 0) { # If less than zero, will set RATE records to similar value (eg, -1, -2) for zero order parameter implementation
+        sim.file$RATE <- rep(NA, times=nrow(sim.file))
+        sim.file[!is.na(sim.file$AMT), "RATE"] <- infusion.duration
+      }
+    }
+
+    # Add Variability to Sampling Time
+    if(!is.null(vary.sample.times.by) & vary.sample.times.by>0) {
+      if(vary.sample.times.by<0) {stop("vary.sample.times.by argument is less than 0.  Argument vary.sample.times.by must be in the range of 0 to 1")}
+      if(vary.sample.times.by>1) {stop("vary.sample.times.by argument is greater than 1.  Argument vary.sample.times.by must be in the range of 0 to 1")}
+    names(sim.file)[names(sim.file)=="TIME"] <- "NTIM"
+    names(sim.file)[names(sim.file)=="TAD"] <- "NTAD"
+    sim.file$TIME <- NA
+    sim.file$TAD <- NA
+    sim.file$TAD <- rnorm(length(sim.file$NTAD), mean=sim.file$NTAD, sd=((vary.sample.times.by/3)*sim.file$NTAD))
+    #hist(sim.file$TAD[sim.file$NTAD==24])
+    sim.file$TIME <- (sim.file$TAD-sim.file$NTAD)+sim.file$NTIM
+    sim.file$NTIM <- round(as.numeric(sim.file$NTIM), time.rounding.precision)
+    sim.file$NTAD <- round(as.numeric(sim.file$NTAD), time.rounding.precision)
+    sim.file <- sim.file[,c(names(sim.file)[1:match("NTAD", names(sim.file))], "TIME", "TAD", names(sim.file)[(match("NTAD", names(sim.file))+1):length(sim.file)])]
+    sim.file <- sim.file[,1:(length(sim.file)-2)]
+  }
+
+    # Final Formatting
+    # sim.file <- sim.file[, 1:(length(sim.file) - 1)]
+    sim.file = dplyr::select(sim.file, -dose.rec)
+    sim.file$TIME <- round(as.numeric(sim.file$TIME), time.rounding.precision)
+    sim.file$TAD <- round(as.numeric(sim.file$TAD), time.rounding.precision)
+    for(i in 1:length(sim.file)) {
+      sim.file[, i] <- as.character(sim.file[, i])
+      sim.file[, i][is.na(sim.file[, i])] <- "."
+    }
+
+    # Set Flags
+    if(!is.null(flag.names)) {
+      # flag.eqs <- c("TAD==0.1667 | TAD==6 | TAD==72", "TAD==0.1667 | TAD==24 | TAD==96")
+
+      flg.eqs <- gsub(" ", "", flag.eqs)
+      flg.eqs <- gsub("[|]", "|sim.file$", flg.eqs)
+      flg.eqs <- gsub("[&]", "&sim.file$", flg.eqs)
+      flg.eqs <- paste("sim.file$", flg.eqs, sep="")
+      for (i in 1:length(flag.names)) {
+        # i <- 1
+
+        sim.file[,flag.names[i]] <- 0
+        sim.file[eval(parse(text = flg.eqs[i])), flag.names[i]] <- 1
+
+      }
+    }
+
+
+    # Save Simulation File
+    {if(n.replicates >= 1) {file.name <- paste0(save.filename.as, "REP", r, file.extension)}
+        else (file.name <- paste0(save.filename.as, file.extension))
+    }
+    write.csv(sim.file, file = file.path(outputpath, file.name), quote=FALSE, row.names=FALSE)
+
+    # Reporting
+    sink(file.path(outputpath, report.filename), T)
+    cat(paste("\n  ", file.name, " Created.\n", sep = ""))
+    sink()
+
+    message(paste0(file.name, " Created.", sep = ""))
+
+  } # End of Replicate Loop
+
+  # End Progress Bar
+  if(n.replicates >= 1) {close(pb)}
+
+  sink(file.path(outputpath, report.filename), T)
+  cat(paste("\n  Completed creation of the NONMEM simulation datasets!\n\n*************************************************************************\n\n", sep = ""))
+
+  # Create Zip Folder
+  if(create.zip.file == TRUE) {
+    dataset.names <- paste0(save.filename.as, "REP", 1:n.replicates, file.extension)
+    zip(paste0(save.filename.as, ".zip"), files = dataset.names)
+  }
+  sink()
+
+  # Control Stream Reporting
+  # sink(report.filename, T)
+  sink(file.path(outputpath, report.filename), T)
+  #######################
+  #  Reminder Messages  #
+  #######################
+  cat(paste("\n\n  ------------------------------------------------------------------", sep = ""))
+  cat(paste("  \n  *** REMEMBER TO ADD THIS TO THE NONMEM SIMULATION CONTROL FILE ***", sep = ""))
+  cat(paste("  \n  ------------------------------------------------------------------", sep = ""))
+  cat(paste("  \n  $INPUT", paste(names(sim.file), collapse=" ")))
+  cat(paste("  \n  $THETA ", sep = ""))
+  cat(paste("  \n     7.5 FIX", sep = ""))
+  cat(paste("  \n     55 FIX  ", sep = ""))
+  cat(paste("  \n     0.33 FIX ...", sep = ""))
+  cat(paste("\n\n  $OMEGA", sep = ""))
+  cat(paste("  \n     0.1 FIX ...", sep = ""))
+  cat(paste("\n\n  $OMEGA BLOCK (2)", sep = ""))
+  cat(paste("  \n     0.1 FIX ...", sep = ""))
+  cat(paste("  \n     0.01", sep = ""))
+  cat(paste("  \n     0.2 ...", sep = ""))
+  cat(paste("\n\n  $SIGMA", sep = ""))
+  cat(paste("  \n     0.02 FIX ...", sep = ""))
+  cat(paste("\n\n  $SIMULATION (XXXXXXX) ONLYSIMULATION", sep = ""))
+  cat(paste("\n\n  $TABLE ID TRT TIME TAD IPRE MDV DV ... ", sep = ""))
+  cat(paste("  \n         NOPRINT ONEHEADER FILE=FTABLE", sep = ""))
+  cat(paste("\n\n  -----------------------------------------------------------------", sep = ""))
+  cat(paste("\n\n  *NOTICE* Only use the FIRSTONLY option in a Table statement\n
+                            wanting a !\n", sep = ""))
+  cat(paste("\n\n  -----------------------------------------------------------------\n\n", sep = ""))
+
+  sink()
+
+  if(close.report==F) {shell.exec(file.path(outputpath, report.filename))}
+
+  #################################
+  # Script Save for Documentation #
+  #################################
+
+  sink(file.path(outputpath, script.filename), T)
+  cat("> create.simulation.dataset(save.filename.as = ", save.filename.as,
+      ", n.subjects = ", n.subjects,
+      ", n.obs.per.subject = ", n.obs.per.subject,
+      ", total.sampling.time = ", total.sampling.time,
+      ", sample.times = ", paste(sample.times, collapse = ","),
+      ", vary.sample.times.by = ", vary.sample.times.by,
+      ", trt = ", trt,
+      ", n.doses = ", n.doses,
+      ", dose.amount = ", paste(dose.amount, collapse = ","),
+      ", dose.timing = ", dose.timing,
+      ", steady.state = ", steady.state,
+      ", dosing.interval = ", paste(dosing.interval, collapse = ","),
+      ", dosage.administration = ", dosage.administration,
+      ", cmt.model = ", cmt.model,
+      ", covariate.source = ", covariate.source,
+      ", resampling.filename = ", resampling.filename,
+      ", cov.names = ", paste(cov.names, collapse = ","),
+      ", cont.covariates = ", paste(cont.covariates, collapse = ","),
+      ", mean.cov.values = ", paste(mean.cov.values, collapse = ","),
+      ", SD.cov.values = ", paste(SD.cov.values, collapse = ","),
+      ", cat.covariates = ", paste(cat.covariates, collapse = ","),
+      ", cat.levels = ", paste(cat.levels, collapse = ","),
+      ", cat.probs = ", paste(cat.probs, collapse = ","),
+      ", cov.to.dose.adj = ", cov.to.dose.adj,
+      ", infusion.duration = ", infusion.duration,
+      ", flag.names = ",  flag.names,
+      ", flag.eqs = ", flag.eqs,
+      ", n.replicates = ", n.replicates,
+      ", file.extension = ", file.extension,
+      ", create.zip.file = ", create.zip.file,
+      ", seed = ", paste(seed, collapse = ","),
+      ", time.rounding.precision = ", time.rounding.precision,
+      ", cov.rounding.precision = ", cov.rounding.precision,
+      ", outputpath = ", outputpath,
+      ", overwrite.prompt = ", overwrite.prompt,
+      ", close.report = ", close.report, ")\n\n", sep = "")
+  print(create.simulation.dataset)
+  print(suppressWarnings(devtools::session_info()))
+  sink()
+
+}
+<environment: namespace:QNt>
+ setting  value                       
+ version  R version 3.2.5 (2016-04-14)
+ system   x86_64, mingw32             
+ ui       RStudio (0.99.903)          
+ language (EN)                        
+ collate  English_United States.1252  
+ tz       America/New_York            
+ date     2017-01-19                  
+
+ package    * version date       source        
+ assertthat   0.1     2013-12-06 CRAN (R 3.2.5)
+ DBI          0.5     2016-08-11 CRAN (R 3.2.5)
+ devtools     1.12.0  2016-06-24 CRAN (R 3.2.5)
+ digest       0.6.10  2016-08-02 CRAN (R 3.2.5)
+ dplyr        0.5.0   2016-06-24 CRAN (R 3.2.5)
+ lazyeval     0.2.0   2016-06-12 CRAN (R 3.2.5)
+ magrittr     1.5     2014-11-22 CRAN (R 3.2.5)
+ memoise      1.0.0   2016-01-29 CRAN (R 3.2.5)
+ QNt        * 1.1.0   2017-01-18 local         
+ R6           2.1.2   2016-01-26 CRAN (R 3.2.5)
+ Rcpp         0.12.6  2016-07-19 CRAN (R 3.2.5)
+ rstudioapi   0.6     2016-06-27 CRAN (R 3.2.5)
+ tcltk2       1.2-11  2014-12-20 CRAN (R 3.2.3)
+ tibble       1.2     2016-08-26 CRAN (R 3.2.5)
+ withr        1.0.2   2016-06-20 CRAN (R 3.2.5)

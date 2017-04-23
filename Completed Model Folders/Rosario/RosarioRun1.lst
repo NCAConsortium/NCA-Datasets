@@ -1,0 +1,400 @@
+Control Stream Name: Rosario_BJCP_1998.ctl
+Data File Name: RosarioRun1.csv
+Mix File Name: 
+Output File Name: RosarioRun1
+Table File Name: sdtab
+Job Started: Wed Jan 25 16:41:01 2017
+Job Completed: Wed Jan 25 16:41:02 2017
+
+**************************************************
+Control Stream Contents : Rosario_BJCP_1998.ctl
+**************************************************
+;Model Desc: 2 CMT IVB LINEAR
+;Project Name: NCAC SIMS
+;Author: BM
+;QC: JK
+;QC2: BM
+
+$PROB RUN# 1
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT NTIM NTAD TIME TAD DOSE 
+      AMT SS II DV MDV EVID 
+      CMT CR60 BSA ALB
+
+$DATA NMDATA IGNORE=@ ; NMDATA = RosarioRun1.csv, RosarioRun2.csv
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field
+; AMT:  Intravenous Dosage Amount Data Item (mg)
+; DV:   Dependent Variable (mg/L);
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing);
+; CR60: Creatinine Clearance (with 60 umol/L cutoff)
+; BSA:  Body Surface Area (m**2)
+; ALB:  Albumin (g/L)
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+$SUBROUTINE ADVAN3 TRANS4
+
+$PK
+
+   TVCL   = THETA(1)                                             ; POPULATION CLEARACE
+   GPCL   = TVCL * (1 + THETA(2) * CR60)                         ; GROUP CLEARANCE
+   PPVCL  = EXP(ETA(1))                                          ; BSV CLEARANCE
+   CL     = GPCL * PPVCL                                         ; INDIVIDUAL CLEARANCE
+
+   TVV1   = THETA(3)                                             ; POPULATION CENTRAL VOLUME
+   GPV1   = TVV1 * (BSA * (ALB/34) ** THETA(4))                  ; GROUP CENTRAL VOLUME 
+   V1     = GPV1                                                 ; INDIVIDUAL CENTRAL VOLUME
+
+   TVQ    = THETA(5)                                             ; POPULATION DISTRIBUTIONAL CLEARANCE
+   PPVQ   = EXP(ETA(2))                                          ; BSV DISTRIBUTIONAL CLEARANCE
+   Q      = TVQ * PPVQ                                           ; INDIVIDUAL DISTRIBUTIONAL CLEARANCE
+
+   TVV2   = THETA(6)                                             ; POPULATION INTERCOMPARTMENTAL CLEARANCE 2 
+   V2     = TVV2                                                 ; INDIVIDUAL INTERCOMPARTMENTAL CLEARANCE 2
+     
+;------------------------------------------------------------
+;----           TIME AFTER DOSE CALCULATION              ----
+;------------------------------------------------------------
+
+
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+   K10   = CL/V1
+   K12   = Q/V1
+   K21   = Q/V2
+   
+   A0 = K10 * K21
+   A1 = K10 + K12 + K21
+
+   RT1 = (A1 + SQRT(A1*A1 - 4* A0)) / 2
+   RT2 = (A1 - SQRT(A1*A1 - 4* A0)) / 2
+
+   IF(RT1.LT.RT2) THEN
+     BETA  = RT1
+     ALPHA = RT2
+   ENDIF
+   IF(RT2.LT.RT1) THEN
+     BETA  = RT2
+     ALPHA = RT1
+   ENDIF
+
+   THALF  = LOG(2)/BETA                                ; HALF-LIFE(h)
+   MRT  = 1/BETA                                       ; MEAN RESIDENT TIME (h) 
+   AREA = DOSE/CL                                      ; MEAN RESIDENT TIME (mg*hr/L) 
+   AUMC = AREA*MRT                                     ; AREA UNDER THE CURVE (mg*hr**2/L)
+   VSS  = V1 + V2                                      ; VOLUME STEADY-STATE (L)
+
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE = F
+Y    = F * EXP(EPS(1)) + EPS(2)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+$THETA
+
+.88                                 ; TV CLEARANCE (L/H) CL
+
+.043                                ; COV CR60 ~ CL
+8.59                                 ; TV V1 (L)
+
+
+0.39                                ; COV ALB ~ V1
+.30                                 ; TV Q (L/H)
+9.79                                 ; TV V2 (L)
+ 
+$OMEGA
+
+.0336                               ; [E] BETWEEN SUBJECT VARIABILITY (CL)
+
+.0765                               ; [E] BETWEEN SUBJECT VARIABILITY (Q)
+
+$SIGMA
+
+.025                                ; [P] PROPORTIONAL RESIDUAL ERROR
+
+.107                                ; [P] ADDITIVE RESIDUAL ERROR
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+$SIM ONLYSIM (8675309)
+
+$TABLE                                         ; STANDARD TABLE
+      ID NTIM NTAD TIME TAD DOSE AMT EVID MDV CMT 
+      CR60 BSA ALB
+      CL Q V1 V2 ETA1 ETA2
+      THALF MRT AREA AUMC VSS
+      IRES IPRE                               ;DV PRED RES WRES - APPENDED
+      NOPRINT ONEHEADER FILE=sdtab
+
+Wed Jan 25 16:41:02 EST 2017
+;Model Desc: 2 CMT IVB LINEAR
+;Project Name: NCAC SIMS
+;Author: BM
+;QC: JK
+;QC2: BM
+
+$PROB RUN# 1
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT NTIM NTAD TIME TAD DOSE 
+      AMT SS II DV MDV EVID 
+      CMT CR60 BSA ALB
+
+$DATA NMDATA IGNORE=@ ; NMDATA = RosarioRun1.csv, RosarioRun2.csv
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field
+; AMT:  Intravenous Dosage Amount Data Item (mg)
+; DV:   Dependent Variable (mg/L);
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing);
+; CR60: Creatinine Clearance (with 60 umol/L cutoff)
+; BSA:  Body Surface Area (m**2)
+; ALB:  Albumin (g/L)
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+$SUBROUTINE ADVAN3 TRANS4
+
+$PK
+
+   TVCL   = THETA(1)                                             ; POPULATION CLEARACE
+   GPCL   = TVCL * (1 + THETA(2) * CR60)                         ; GROUP CLEARANCE
+   PPVCL  = EXP(ETA(1))                                          ; BSV CLEARANCE
+   CL     = GPCL * PPVCL                                         ; INDIVIDUAL CLEARANCE
+
+   TVV1   = THETA(3)                                             ; POPULATION CENTRAL VOLUME
+   GPV1   = TVV1 * (BSA * (ALB/34) ** THETA(4))                  ; GROUP CENTRAL VOLUME 
+   V1     = GPV1                                                 ; INDIVIDUAL CENTRAL VOLUME
+
+   TVQ    = THETA(5)                                             ; POPULATION DISTRIBUTIONAL CLEARANCE
+   PPVQ   = EXP(ETA(2))                                          ; BSV DISTRIBUTIONAL CLEARANCE
+   Q      = TVQ * PPVQ                                           ; INDIVIDUAL DISTRIBUTIONAL CLEARANCE
+
+   TVV2   = THETA(6)                                             ; POPULATION INTERCOMPARTMENTAL CLEARANCE 2 
+   V2     = TVV2                                                 ; INDIVIDUAL INTERCOMPARTMENTAL CLEARANCE 2
+     
+;------------------------------------------------------------
+;----           TIME AFTER DOSE CALCULATION              ----
+;------------------------------------------------------------
+
+
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+   K10   = CL/V1
+   K12   = Q/V1
+   K21   = Q/V2
+   
+   A0 = K10 * K21
+   A1 = K10 + K12 + K21
+
+   RT1 = (A1 + SQRT(A1*A1 - 4* A0)) / 2
+   RT2 = (A1 - SQRT(A1*A1 - 4* A0)) / 2
+
+   IF(RT1.LT.RT2) THEN
+     BETA  = RT1
+     ALPHA = RT2
+   ENDIF
+   IF(RT2.LT.RT1) THEN
+     BETA  = RT2
+     ALPHA = RT1
+   ENDIF
+
+   THALF  = LOG(2)/BETA                                ; HALF-LIFE(h)
+   MRT  = 1/BETA                                       ; MEAN RESIDENT TIME (h) 
+   AREA = DOSE/CL                                      ; MEAN RESIDENT TIME (mg*hr/L) 
+   AUMC = AREA*MRT                                     ; AREA UNDER THE CURVE (mg*hr**2/L)
+   VSS  = V1 + V2                                      ; VOLUME STEADY-STATE (L)
+
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE = F
+Y    = F * EXP(EPS(1)) + EPS(2)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+$THETA
+
+.88                                 ; TV CLEARANCE (L/H) CL
+
+.043                                ; COV CR60 ~ CL
+8.59                                 ; TV V1 (L)
+
+
+0.39                                ; COV ALB ~ V1
+.30                                 ; TV Q (L/H)
+9.79                                 ; TV V2 (L)
+ 
+$OMEGA
+
+.0336                               ; [E] BETWEEN SUBJECT VARIABILITY (CL)
+
+.0765                               ; [E] BETWEEN SUBJECT VARIABILITY (Q)
+
+$SIGMA
+
+.025                                ; [P] PROPORTIONAL RESIDUAL ERROR
+
+.107                                ; [P] ADDITIVE RESIDUAL ERROR
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+$SIM ONLYSIM (8675309)
+
+$TABLE                                         ; STANDARD TABLE
+      ID NTIM NTAD TIME TAD DOSE AMT EVID MDV CMT 
+      CR60 BSA ALB
+      CL Q V1 V2 ETA1 ETA2
+      THALF MRT AREA AUMC VSS
+      IRES IPRE                               ;DV PRED RES WRES - APPENDED
+      NOPRINT ONEHEADER FILE=sdtab
+
+
+
+NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM)    DOUBLE PRECISION NONMEM    VERSION VI LEVEL 1.0  
+DEVELOPED AND PROGRAMMED BY STUART BEAL AND LEWIS SHEINER
+
+PROBLEM NO.:         1
+RUN# 1                                                                  
+
+DATA CHECKOUT RUN:              NO 
+DATA SET LOCATED ON UNIT NO.:    2
+THIS UNIT TO BE REWOUND:        NO 
+NO. OF DATA RECS IN DATA SET:  700
+NO. OF DATA ITEMS IN DATA SET:  18
+ID DATA ITEM IS DATA ITEM NO.:   2
+DEP VARIABLE IS DATA ITEM NO.:  12
+MDV DATA ITEM IS DATA ITEM NO.: 13
+
+INDICES PASSED TO SUBROUTINE PRED:
+14  6  9  0 10 11 15  0  0
+ 0  0
+
+LABELS FOR DATA ITEMS:
+   C      ID     TRT    NTIM    NTAD    TIME     TAD    DOSE     AMT
+  SS      II      DV     MDV    EVID     CMT    CR60     BSA     ALB
+
+(NONBLANK) LABELS FOR PRED-DEFINED ITEMS:
+  CL      V1       Q      V2    THAL     MRT    AREA    AUMC     VSS
+IPRE    IRES
+
+FORMAT FOR DATA:
+(E2.0,E4.0,E2.0,2E3.0,2E7.0,2E4.0,6E2.0,E7.0,E5.0,E6.0)                         
+
+TOT. NO. OF OBS RECS:     560
+TOT. NO. OF INDIVIDUALS:  140
+
+LENGTH OF THETA:  6
+
+OMEGA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  2
+
+SIGMA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  2
+
+INITIAL ESTIMATE OF THETA:
+  0.8800E+00  0.4300E-01  0.8590E+01 -0.3900E+00  0.1300E+01  0.9790E+01
+
+INITIAL ESTIMATE OF OMEGA:
+0.3360E-01
+0.0000E+00   0.7650E-01
+
+INITIAL ESTIMATE OF SIGMA:
+0.2500E-01
+0.0000E+00   0.1070E+00
+
+SIMULATION STEP OMITTED:    NO 
+OBJ FUNC EVALUATED:         NO 
+SOURCE  1:
+   SEED1:       8675309   SEED2:             0   PSEUDO-NORMAL       
+
+TABLES STEP OMITTED:    NO 
+NO. OF TABLES:           1
+
+-- TABLE  1 --
+PRINTED:                NO 
+HEADER:                YES 
+FILE TO BE FORWARDED:   NO 
+
+USER-CHOSEN ITEMS 
+IN THE ORDER THEY WILL APPEAR IN THE TABLE:
+  ID    NTIM    NTAD    TIME     TAD    DOSE     AMT    EVID     MDV     CMT    CR60     BSA     ALB      CL       Q
+  V1      V2    ETA1    ETA2    THAL     MRT    AREA    AUMC     VSS    IRES    IPRE
+DOUBLE PRECISION PREDPP VERSION V LEVEL 1.0  
+
+TWO COMPARTMENT MODEL (ADVAN3)
+
+MAXIMUM NO. OF BASIC PK PARAMETERS:   4
+
+BASIC PK PARAMETERS (AFTER TRANSLATION):
+  BASIC PK PARAMETER NO.  1: ELIMINATION RATE (K)
+  BASIC PK PARAMETER NO.  2: CENTRAL-TO-PERIPH. RATE (K12)
+  BASIC PK PARAMETER NO.  3: PERIPH.-TO-CENTRAL RATE (K21)
+TRANSLATOR WILL CONVERT PARAMETERS 
+CL, V1, Q, V2 TO K, K12, K21 (TRANS4)
+
+COMPARTMENT ATTRIBUTES 
+COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                        STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+   1         CENTRAL      ON         NO         YES        YES        YES
+   2         PERIPH.      ON         NO         YES        NO         NO 
+   3         OUTPUT       OFF        YES        NO         NO         NO 
+
+ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+COMPT. NO.                             INDICES
+             SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                        FRACTION    RATE        DURATION    LAG  
+   1           *           *           *           *           *
+   2           *           *           *           *           *
+   3           *           -           -           -           -
+            - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+            * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+              WILL DEFAULT TO ONE IF APPLICABLE
+
+DATA ITEM INDICES USED BY PRED ARE:
+  EVENT ID DATA ITEM IS DATA ITEM NO.:     14
+  TIME DATA ITEM IS DATA ITEM NO.:          6
+  DOSE AMOUNT DATA ITEM IS DATA ITEM NO.:   9
+  STEADY STATE DATA ITEM IS DATA ITEM NO.: 10
+  INTERVAL DATA ITEM IS DATA ITEM NO.:     11
+  COMPT. NO. DATA ITEM IS DATA ITEM NO.:   15
+
+
+PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+
+ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+
+SIMULATION STEP PERFORMED
+SOURCE  1:
+   SEED1:    1811045243   SEED2:             0
+Wed Jan 25 16:41:02 EST 2017

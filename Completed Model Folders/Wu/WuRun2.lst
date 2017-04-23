@@ -1,0 +1,336 @@
+Control Stream Name: Wu_JCP_2012.ctl
+Data File Name: WuRun2.csv
+Mix File Name: 
+Output File Name: WuRun2
+Table File Name: sdtab
+Job Started: Sat Feb  4 18:23:01 2017
+Job Completed: Sat Feb  4 18:23:02 2017
+
+**************************************************
+Control Stream Contents : Wu_JCP_2012.ctl
+**************************************************
+;Model Desc: 1 CMT INFUSION NONLINEAR
+;Project Name: NCAC SIMS
+;Author: BM
+;QC: JK
+;QC2: BM
+
+$PROB RUN# 1
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT TIME TAD DOSE AMT DUR RATE=DROP SS=DROP II=DROP DV MDV EVID CMT BSA LT
+
+$DATA NMDATA IGNORE=C ; NMDATA = WuRun1.csv, WuRun2.csv
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field (hr)
+; AMT:  Intravenous Dosage Amount Data Item (mg)
+; DUR:  Infusion Duration (hr)
+; DV:   Dependent Variable (ug/L);
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing)
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; BSA:  Body Surface Area (m**2)
+; LT:   Presence of Liver Tumor (0 - Absent, 1 - Present)
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+$SUBROUTINE ADVAN6 TRANS1 TOL=4
+
+$MODEL COMP=(CENTRAL,DEFDOSE)           ;cmt=1
+
+$PK
+
+   TVV   = THETA(1)                                             ; POPULATION CLEARACE
+   PPVV  = EXP(ETA(1))
+   V     = TVV * PPVV
+
+   IF (LT.EQ.0) THEN
+   TVVMAX = THETA(2)
+   END IF
+   IF (LT.EQ.1) THEN
+   TVVMAX = THETA(3)
+   END IF
+   PPVVMA  = EXP(ETA(2))                                        ; BSV CLEARANCE
+   VMAX     = TVVMAX * PPVVMA                                   ; INDIVIDUAL CLEARANCE
+
+   TVKM   = THETA(4)                                             ; POPULATION CENTRAL VOLUME
+   KM     = TVKM                                                 ; INDIVIDUAL CENTRAL VOLUME
+
+   S1     = V/1000                                               ; SCALING FACTOR ug/L to mg/L
+
+$DES
+   C1 = A(1)/V
+
+   DADT(1) = -((VMAX*C1)/(KM+C1))
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+
+VSS = V
+   
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE=F
+Y    = F * (1 + EPS(1)) + EPS(2)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+$THETA
+3.63                                 ; TV VOLUME (L) V
+97.4                                 ; TV VMAX (ug/h) NO LIVER TUMOR
+50                                  ; TV VMAX (ug/h) LIVER TUMOR
+992                                  ; KM (ug/L)
+
+$OMEGA
+
+.4177                               ; [E] BETWEEN SUBJECT VARIABILITY (V)
+.649                                ; [E] BETWEEN SUBJECT VARIABILITY (VMAX)
+
+$SIGMA
+
+.02074                              ; [P] PROPORTIONAL RESIDUAL ERROR
+0.9                                 ; [P] ADDITIVE RESIDUAL ERROR
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+$SIM ONLYSIM (8675309) 
+
+$TABLE                                         ; STANDARD TABLE
+      ID TIME TAD DOSE AMT DUR EVID MDV CMT 
+      BSA LT 
+      V VMAX KM ETA1 ETA2
+      VSS
+      IRES IPRE                               ;DV PRED RES WRES - APPENDED
+      NOPRINT ONEHEADER FILE=sdtab
+
+Sat Feb  4 18:23:02 EST 2017
+;Model Desc: 1 CMT INFUSION NONLINEAR
+;Project Name: NCAC SIMS
+;Author: BM
+;QC: JK
+;QC2: BM
+
+$PROB RUN# 1
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT TIME TAD DOSE AMT DUR RATE=DROP SS=DROP II=DROP DV MDV EVID CMT BSA LT
+
+$DATA NMDATA IGNORE=C ; NMDATA = WuRun1.csv, WuRun2.csv
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field (hr)
+; AMT:  Intravenous Dosage Amount Data Item (mg)
+; DUR:  Infusion Duration (hr)
+; DV:   Dependent Variable (ug/L);
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing)
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; BSA:  Body Surface Area (m**2)
+; LT:   Presence of Liver Tumor (0 - Absent, 1 - Present)
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+$SUBROUTINE ADVAN6 TRANS1 TOL=4
+
+$MODEL COMP=(CENTRAL,DEFDOSE)           ;cmt=1
+
+$PK
+
+   TVV   = THETA(1)                                             ; POPULATION CLEARACE
+   PPVV  = EXP(ETA(1))
+   V     = TVV * PPVV
+
+   IF (LT.EQ.0) THEN
+   TVVMAX = THETA(2)
+   END IF
+   IF (LT.EQ.1) THEN
+   TVVMAX = THETA(3)
+   END IF
+   PPVVMA  = EXP(ETA(2))                                        ; BSV CLEARANCE
+   VMAX     = TVVMAX * PPVVMA                                   ; INDIVIDUAL CLEARANCE
+
+   TVKM   = THETA(4)                                             ; POPULATION CENTRAL VOLUME
+   KM     = TVKM                                                 ; INDIVIDUAL CENTRAL VOLUME
+
+   S1     = V/1000                                               ; SCALING FACTOR ug/L to mg/L
+
+$DES
+   C1 = A(1)/V
+
+   DADT(1) = -((VMAX*C1)/(KM+C1))
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+
+VSS = V
+   
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE=F
+Y    = F * (1 + EPS(1)) + EPS(2)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+$THETA
+3.63                                 ; TV VOLUME (L) V
+97.4                                 ; TV VMAX (ug/h) NO LIVER TUMOR
+50                                  ; TV VMAX (ug/h) LIVER TUMOR
+992                                  ; KM (ug/L)
+
+$OMEGA
+
+.4177                               ; [E] BETWEEN SUBJECT VARIABILITY (V)
+.649                                ; [E] BETWEEN SUBJECT VARIABILITY (VMAX)
+
+$SIGMA
+
+.02074                              ; [P] PROPORTIONAL RESIDUAL ERROR
+0.9                                 ; [P] ADDITIVE RESIDUAL ERROR
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+$SIM ONLYSIM (8675309) 
+
+$TABLE                                         ; STANDARD TABLE
+      ID TIME TAD DOSE AMT DUR EVID MDV CMT 
+      BSA LT 
+      V VMAX KM ETA1 ETA2
+      VSS
+      IRES IPRE                               ;DV PRED RES WRES - APPENDED
+      NOPRINT ONEHEADER FILE=sdtab
+
+
+
+NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM)    DOUBLE PRECISION NONMEM    VERSION VI LEVEL 1.0  
+DEVELOPED AND PROGRAMMED BY STUART BEAL AND LEWIS SHEINER
+
+PROBLEM NO.:         1
+RUN# 1                                                                  
+
+DATA CHECKOUT RUN:              NO 
+DATA SET LOCATED ON UNIT NO.:    2
+THIS UNIT TO BE REWOUND:        NO 
+NO. OF DATA RECS IN DATA SET:  990
+NO. OF DATA ITEMS IN DATA SET:  14
+ID DATA ITEM IS DATA ITEM NO.:   2
+DEP VARIABLE IS DATA ITEM NO.:   9
+MDV DATA ITEM IS DATA ITEM NO.: 10
+
+INDICES PASSED TO SUBROUTINE PRED:
+11  4  7  0  0  0 12  0  0
+ 0  0
+
+LABELS FOR DATA ITEMS:
+   C      ID     TRT    TIME     TAD    DOSE     AMT     DUR      DV
+ MDV    EVID     CMT     BSA      LT
+
+(NONBLANK) LABELS FOR PRED-DEFINED ITEMS:
+   V    VMAX      KM     VSS    IPRE    IRES
+
+FORMAT FOR DATA:
+(E2.0,E3.0,E2.0,E4.0,E3.0,E4.0,E6.0,5E2.0,E5.0,E2.0)                            
+
+TOT. NO. OF OBS RECS:     765
+TOT. NO. OF INDIVIDUALS:   45
+
+LENGTH OF THETA:  4
+
+OMEGA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  2
+
+SIGMA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  2
+
+INITIAL ESTIMATE OF THETA:
+  0.3630E+01  0.9740E+02  0.1500E+03  0.9920E+03
+
+INITIAL ESTIMATE OF OMEGA:
+0.4177E+00
+0.0000E+00   0.1649E+01
+
+INITIAL ESTIMATE OF SIGMA:
+0.2074E-01
+0.0000E+00   0.1090E+02
+
+SIMULATION STEP OMITTED:    NO 
+OBJ FUNC EVALUATED:         NO 
+SOURCE  1:
+   SEED1:       8675309   SEED2:             0   PSEUDO-NORMAL       
+
+TABLES STEP OMITTED:    NO 
+NO. OF TABLES:           1
+
+-- TABLE  1 --
+PRINTED:                NO 
+HEADERS:               ONE
+FILE TO BE FORWARDED:   NO 
+
+USER-CHOSEN ITEMS 
+IN THE ORDER THEY WILL APPEAR IN THE TABLE:
+  ID    TIME     TAD    DOSE     AMT     DUR    EVID     MDV     CMT     BSA      LT       V    VMAX      KM    ETA1
+ETA2     VSS    IRES    IPRE
+DOUBLE PRECISION PREDPP VERSION V LEVEL 1.0  
+
+GENERAL NONLINEAR KINETICS MODEL (ADVAN6)
+
+MODEL SUBROUTINE USER-SUPPLIED - ID NO. 9999
+
+MAXIMUM NO. OF BASIC PK PARAMETERS:   3
+
+COMPARTMENT ATTRIBUTES 
+COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                        STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+   1         CENTRAL      ON         YES        YES        YES        YES
+   2         OUTPUT       OFF        YES        NO         NO         NO 
+
+NRD VALUE FROM SUBROUTINE TOL:   4
+
+ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+COMPT. NO.                             INDICES
+             SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                        FRACTION    RATE        DURATION    LAG  
+   1           4           *           *           *           *
+   2           *           -           -           -           -
+            - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+            * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+              WILL DEFAULT TO ONE IF APPLICABLE
+
+DATA ITEM INDICES USED BY PRED ARE:
+  EVENT ID DATA ITEM IS DATA ITEM NO.:     11
+  TIME DATA ITEM IS DATA ITEM NO.:          4
+  DOSE AMOUNT DATA ITEM IS DATA ITEM NO.:   7
+  COMPT. NO. DATA ITEM IS DATA ITEM NO.:   12
+
+
+PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+
+ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+
+DES SUBROUTINE USES COMPACT STORAGE MODE.
+
+SIMULATION STEP PERFORMED
+SOURCE  1:
+   SEED1:    1016751143   SEED2:             0
+Sat Feb  4 18:23:02 EST 2017

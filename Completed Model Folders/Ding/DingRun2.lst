@@ -1,0 +1,403 @@
+Control Stream Name: Ding_Clink_PK_2015_Run_2.ctl
+Data File Name: DingRun2REP1.csv
+Mix File Name: 
+Output File Name: DingRun2
+Table File Name: sdtab
+Job Started: Wed Jan 18 12:35:01 2017
+Job Completed: Wed Jan 18 12:35:02 2017
+
+**************************************************
+Control Stream Contents : Ding_Clink_PK_2015_Run_2.ctl
+**************************************************
+;Model Desc: 1 CMT EV NONLINEAR  
+;Project Name: NCAC SIMS
+;Author: JK
+;QC: BM
+
+$PROB RUN# SIM Ding
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT NTIM NTAD TIME TAD DOSE AMT SS II DV MDV EVID 
+CMT BW TDD CBZ
+
+$DATA NMDATA IGNORE=@ ; NMDATA = DingRun2REP1
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field
+; AMT:  Oral Dosage Amount Data Item (mg)
+; DV:   Dependent Variable (mg/L)
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing)
+; ADDL: Additional number of doses given after the first dosing record
+; II:   Dosing Interval
+; BW:   Weight (kg)
+; TDD:  Total Daily Dose (mg/kg)
+; CBZ:  Carbamazepine coadmin = 1, otherwise = 0
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+
+$SUBROUTINE ADVAN6 TOL=3
+
+$MODEL NCOMPARTMENTS=2
+NPARAMETERS=8
+COMP (DEPOT, DEFDOSE)
+COMP (CENTRAL, DEFOBS)
+
+$PK
+
+TVEMAX= THETA(4)                                     ; POPULATION EMAX 
+EM    = TVEMAX                                       ; INDIVIDUAL EMAX
+
+TVGAM = THETA(5)                                     ; POP FIXED HILL COEFFICIENT
+GAM   = TVGAM                                        ; IND FIXED HILL COEFFICIENT
+
+TDD50 = THETA(6)                                     ; POP TDD50
+
+TVCL  = THETA(1)                                     ; POPULATION CLEARANCE
+GPCL1 = TVCL*((BW/70)**THETA(7))*(THETA(8)**CBZ)     ; GRP CL
+GPCL2 = GPCL1*(1+(EM*TDD**GAM)/(TDD50**GAM+TDD**GAM)); GRP CL
+PPVCL = EXP(ETA(1))                                  ; BSV CLEARANCE
+CL    = GPCL2 * PPVCL                                ; INDIVIDUAL CLEARANCE
+
+TVV1  = THETA(2)                                     ; POPULATION CENTRAL VOLUME
+GPV1  = TVV1*(BW/70)                                 ; GROUP CENTRAL VOLUME WT
+V1    = GPV1                                         ; INDIVIDUAL CENTRAL VOLUME
+
+TVKA  = THETA(3)                                     ; POPULATION PO TAB KA (ABSORPTION RATE)
+GPKA  = TVKA                                         ; GROUP PO TAB KA
+KA    = GPKA                                         ; INDIVIDUAL PO TAB KA
+
+
+
+
+
+$DES
+
+C1=A(1)
+C2=A(2)/V1
+DADT(1)=-KA*C1
+DADT(2)=(KA*C1)-(CL*C2)
+
+
+     
+;------------------------------------------------------------
+;----           TIME AFTER DOSE CALCULATION              ----
+;------------------------------------------------------------
+
+
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+
+;K = CL/V1
+
+;    T12 = 0.693 / K
+;    MRT = 1/K
+;    AREA = DOSE/CL
+;    AUMC = AREA*MRT
+    VSSF = V1
+
+
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE = F
+Y    = F + EPS(1)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+
+$THETA
+
+.300   ; CLEARANCE (L/HR)
+22.2    ; CENTRAL VOLUME (L) 
+.57    ; KA PO TAB ABSORPTION RATE CONSTANT (1/HR)
+2.8     ; EMAX
+.68    ; HILL COEFFICIENT
+37.4    ; TDD50 (MG/KG) (TDD WHEN EMAX IS INCREASED 50%)
+
+.667   ; EXPONENT ON WEIGHT FOR CLEARANCE 
+.43    ; EFFECT OF CBZ ON CLEARANCE
+
+$OMEGA
+
+.178   ; [E] BETWEEN SUBJECT VARIABILITY (CL)
+
+$SIGMA
+3.3    ; [A] ADDITIVE RESIDUAL ERROR (MG/L)
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+
+$SIM ONLYSIM (3776054)
+
+$TABLE ID TIME II DOSE AMT DV CMT EVID PRED MDV 
+IWRE IRES IPRE CL V1 KA EM GAM TDD50 ETA1 BW CBZ TDD VSSF
+NOPRINT ONEHEADER FILE=sdtab
+Wed Jan 18 12:35:02 EST 2017
+;Model Desc: 1 CMT EV NONLINEAR  
+;Project Name: NCAC SIMS
+;Author: JK
+;QC: BM
+
+$PROB RUN# SIM Ding
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT NTIM NTAD TIME TAD DOSE AMT SS II DV MDV EVID 
+CMT BW TDD CBZ
+
+$DATA NMDATA IGNORE=@ ; NMDATA = DingRun2REP1
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field
+; AMT:  Oral Dosage Amount Data Item (mg)
+; DV:   Dependent Variable (mg/L)
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing)
+; ADDL: Additional number of doses given after the first dosing record
+; II:   Dosing Interval
+; BW:   Weight (kg)
+; TDD:  Total Daily Dose (mg/kg)
+; CBZ:  Carbamazepine coadmin = 1, otherwise = 0
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+
+$SUBROUTINE ADVAN6 TOL=3
+
+$MODEL NCOMPARTMENTS=2
+NPARAMETERS=8
+COMP (DEPOT, DEFDOSE)
+COMP (CENTRAL, DEFOBS)
+
+$PK
+
+TVEMAX= THETA(4)                                     ; POPULATION EMAX 
+EM    = TVEMAX                                       ; INDIVIDUAL EMAX
+
+TVGAM = THETA(5)                                     ; POP FIXED HILL COEFFICIENT
+GAM   = TVGAM                                        ; IND FIXED HILL COEFFICIENT
+
+TDD50 = THETA(6)                                     ; POP TDD50
+
+TVCL  = THETA(1)                                     ; POPULATION CLEARANCE
+GPCL1 = TVCL*((BW/70)**THETA(7))*(THETA(8)**CBZ)     ; GRP CL
+GPCL2 = GPCL1*(1+(EM*TDD**GAM)/(TDD50**GAM+TDD**GAM)); GRP CL
+PPVCL = EXP(ETA(1))                                  ; BSV CLEARANCE
+CL    = GPCL2 * PPVCL                                ; INDIVIDUAL CLEARANCE
+
+TVV1  = THETA(2)                                     ; POPULATION CENTRAL VOLUME
+GPV1  = TVV1*(BW/70)                                 ; GROUP CENTRAL VOLUME WT
+V1    = GPV1                                         ; INDIVIDUAL CENTRAL VOLUME
+
+TVKA  = THETA(3)                                     ; POPULATION PO TAB KA (ABSORPTION RATE)
+GPKA  = TVKA                                         ; GROUP PO TAB KA
+KA    = GPKA                                         ; INDIVIDUAL PO TAB KA
+
+
+
+
+
+$DES
+
+C1=A(1)
+C2=A(2)/V1
+DADT(1)=-KA*C1
+DADT(2)=(KA*C1)-(CL*C2)
+
+
+     
+;------------------------------------------------------------
+;----           TIME AFTER DOSE CALCULATION              ----
+;------------------------------------------------------------
+
+
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+
+;K = CL/V1
+
+;    T12 = 0.693 / K
+;    MRT = 1/K
+;    AREA = DOSE/CL
+;    AUMC = AREA*MRT
+    VSSF = V1
+
+
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE = F
+Y    = F + EPS(1)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+
+$THETA
+
+.300   ; CLEARANCE (L/HR)
+22.2    ; CENTRAL VOLUME (L) 
+.57    ; KA PO TAB ABSORPTION RATE CONSTANT (1/HR)
+2.8     ; EMAX
+.68    ; HILL COEFFICIENT
+37.4    ; TDD50 (MG/KG) (TDD WHEN EMAX IS INCREASED 50%)
+
+.667   ; EXPONENT ON WEIGHT FOR CLEARANCE 
+.43    ; EFFECT OF CBZ ON CLEARANCE
+
+$OMEGA
+
+.178   ; [E] BETWEEN SUBJECT VARIABILITY (CL)
+
+$SIGMA
+3.3    ; [A] ADDITIVE RESIDUAL ERROR (MG/L)
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+
+$SIM ONLYSIM (3776054)
+
+$TABLE ID TIME II DOSE AMT DV CMT EVID PRED MDV 
+IWRE IRES IPRE CL V1 KA EM GAM TDD50 ETA1 BW CBZ TDD VSSF
+NOPRINT ONEHEADER FILE=sdtab
+
+
+NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM)    DOUBLE PRECISION NONMEM    VERSION VI LEVEL 1.0  
+DEVELOPED AND PROGRAMMED BY STUART BEAL AND LEWIS SHEINER
+
+PROBLEM NO.:         1
+RUN# SIM Ding                                                           
+
+DATA CHECKOUT RUN:              NO 
+DATA SET LOCATED ON UNIT NO.:    2
+THIS UNIT TO BE REWOUND:        NO 
+NO. OF DATA RECS IN DATA SET:  640
+NO. OF DATA ITEMS IN DATA SET:  18
+ID DATA ITEM IS DATA ITEM NO.:   2
+DEP VARIABLE IS DATA ITEM NO.:  12
+MDV DATA ITEM IS DATA ITEM NO.: 13
+
+INDICES PASSED TO SUBROUTINE PRED:
+14  6  9  0 10 11 15  0  0
+ 0  0
+
+LABELS FOR DATA ITEMS:
+   C      ID     TRT    NTIM    NTAD    TIME     TAD    DOSE     AMT
+  SS      II      DV     MDV    EVID     CMT      BW     TDD     CBZ
+
+(NONBLANK) LABELS FOR PRED-DEFINED ITEMS:
+  EM     GAM    TDD5      CL      V1      KA    VSSF    IPRE    IRES
+IWRE
+
+FORMAT FOR DATA:
+(E2.0,E3.0,E2.0,E4.0,E3.0,2E7.0,2E4.0,6E2.0,E6.0,E12.0,E2.0)                    
+
+TOT. NO. OF OBS RECS:     480
+TOT. NO. OF INDIVIDUALS:   20
+
+LENGTH OF THETA:  8
+
+OMEGA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  1
+
+SIGMA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  1
+
+INITIAL ESTIMATE OF THETA:
+  0.3000E+00  0.2220E+02  0.1570E+01  0.2800E+01  0.1680E+01  0.3740E+02  0.6670E+00  0.1430E+01
+
+INITIAL ESTIMATE OF OMEGA:
+0.1780E+00
+
+INITIAL ESTIMATE OF SIGMA:
+0.1330E+02
+
+SIMULATION STEP OMITTED:    NO 
+OBJ FUNC EVALUATED:         NO 
+SOURCE  1:
+   SEED1:       3776054   SEED2:             0   PSEUDO-NORMAL       
+
+TABLES STEP OMITTED:    NO 
+NO. OF TABLES:           1
+
+-- TABLE  1 --
+PRINTED:                NO 
+HEADER:                YES 
+FILE TO BE FORWARDED:   NO 
+
+USER-CHOSEN ITEMS 
+IN THE ORDER THEY WILL APPEAR IN THE TABLE:
+  ID    TIME      II    DOSE     AMT      DV     CMT    EVID     MDV    IWRE    IRES    IPRE      CL      V1      KA
+  EM     GAM    TDD5    ETA1      BW     CBZ     TDD    VSSF
+DOUBLE PRECISION PREDPP VERSION V LEVEL 1.0  
+
+GENERAL NONLINEAR KINETICS MODEL (ADVAN6)
+
+MODEL SUBROUTINE USER-SUPPLIED - ID NO. 9999
+
+MAXIMUM NO. OF BASIC PK PARAMETERS:   8
+
+COMPARTMENT ATTRIBUTES 
+COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                        STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+   1         DEPOT        ON         YES        YES        YES        NO 
+   2         CENTRAL      ON         YES        YES        NO         YES
+   3         OUTPUT       OFF        YES        NO         NO         NO 
+
+GENERAL STEADY STATE (SS) ROUTINE IS BEING USED
+
+NRD VALUE FROM SUBROUTINE TOL:   3
+
+ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+COMPT. NO.                             INDICES
+             SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                        FRACTION    RATE        DURATION    LAG  
+   1           *           *           *           *           *
+   2           *           *           *           *           *
+   3           *           -           -           -           -
+            - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+            * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+              WILL DEFAULT TO ONE IF APPLICABLE
+
+DATA ITEM INDICES USED BY PRED ARE:
+  EVENT ID DATA ITEM IS DATA ITEM NO.:     14
+  TIME DATA ITEM IS DATA ITEM NO.:          6
+  DOSE AMOUNT DATA ITEM IS DATA ITEM NO.:   9
+  STEADY STATE DATA ITEM IS DATA ITEM NO.: 10
+  INTERVAL DATA ITEM IS DATA ITEM NO.:     11
+  COMPT. NO. DATA ITEM IS DATA ITEM NO.:   15
+
+
+PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+
+ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+
+DES SUBROUTINE USES COMPACT STORAGE MODE.
+
+SIMULATION STEP PERFORMED
+SOURCE  1:
+   SEED1:    1055012630   SEED2:             0
+Wed Jan 18 12:35:02 EST 2017

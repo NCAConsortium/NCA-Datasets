@@ -1,0 +1,86 @@
+
+*************************************************************************
+*************************************************************************
+          CREATE SIMULATION DATASET REPORT 2017-02-05-11-45-43
+*************************************************************************
+*************************************************************************
+
+	Save Filename:                DiPaoloRun2
+	N Subjects:                   50
+	N Obs / Subject:              8
+	Total Sampling Time:          106
+	Sampling Times:               1, 4, 16, 23, 73, 76, 88, 106
+	Vary Sampling Times By:       0.05
+	Treatment Assignment:         1
+	N Doses:                      4
+	Dose Amount:                  7
+	Dose Timing:                  SEQUENTIAL
+	Steady-State:                 FALSE
+	Dosing Interval:              24
+	Dosage Administration:        IV
+	CMT Model:                    1
+	Covariate Source:             DISTRIBUTION
+	Re-Sampling Filename:         
+	Covariate Names:              WT
+	Continuous Covariates:        AGE, WTKG, SCR
+	Mean Covariate Values:        65.8, 70.6, 0.99
+	SD Covariate Values:          14.5, 17.2, 0.3
+	Categorical Covariates:       SEX
+	Categorical Levels:           2
+	Categorical Probabilities:    0.5
+	Covariate for Dose Adjustment:WTKG
+	Infusion Duration:            0.5
+	Flag Name(s):                 
+	Flag Equation(s):             
+	Number of Replicates:         1
+	File Extension:               .csv
+	Create Zip File:              FALSE
+	Randomization Seed(s):        20170204
+	Time Rounding Precision:      3
+	Covariate Rounding Precision: 2
+	Output Path:                  C:/Users/q831301/Desktop
+
+*************************************************************************
+
+  DiPaoloRun2REP1.csv Created.
+
+  Completed creation of the NONMEM simulation datasets!
+
+*************************************************************************
+
+
+
+  ------------------------------------------------------------------  
+  *** REMEMBER TO ADD THIS TO THE NONMEM SIMULATION CONTROL FILE ***  
+  ------------------------------------------------------------------  
+  $INPUT C ID TRT NTIM NTAD TIME TAD DOSE AMT DUR RATE SS II DV MDV EVID CMT AGE WTKG SCR SEX  
+  $THETA   
+     7.5 FIX  
+     55 FIX    
+     0.33 FIX ...
+
+  $OMEGA  
+     0.1 FIX ...
+
+  $OMEGA BLOCK (2)  
+     0.1 FIX ...  
+     0.01  
+     0.2 ...
+
+  $SIGMA  
+     0.02 FIX ...
+
+  $SIMULATION (XXXXXXX) ONLYSIMULATION
+
+  $TABLE ID TRT TIME TAD IPRE MDV DV ...   
+         NOPRINT ONEHEADER FILE=FTABLE
+
+  -----------------------------------------------------------------
+
+  *NOTICE* Only use the FIRSTONLY option in a Table statement
+
+                            wanting a !
+
+
+  -----------------------------------------------------------------
+

@@ -1,0 +1,13 @@
+Author,LLOQ,Units,Notes,Matches DV unit
+Jin,1,ng/mL,1-10 range for LLQ,yes
+Chen,1,ng/mL,,yes
+Bellanti,0.14,mcg/mL,,yes
+Lindemalm,0.000285,mg/L,converted from 1 nM,yes
+Endres,0.05,mcg/mL,,yes
+Rubino,0.01,mcg/mL,,yes
+Ding,12.5,mg/L,,yes
+Rosario,0.1,mg/L,,yes
+Lee,0.1,ng/mL,,yes
+Di Paolo,0.78,mg/L,,yes
+Wu,2,ng/mL,,yes
+Jonsson,0.03,umol/L,0.03-0.06 range for LLOQ,yes

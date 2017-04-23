@@ -1,0 +1,28 @@
+FILE    FSTREAM                                                                 
+PROB    RUN# 1                                                                  
+DATA       1   0 275  14   0                                                    
+ITEM       2   9  10  11   1   0   0   0   0   0  51   0   0   0   0            
+INDX      11   4   6   0   7   8  12   0   0   0   0                            
+LABL       C      ID    NTIM    TIME    DOSE     AMT      SS      II      DV    
+         MDV    EVID     CMT     AGE    WTKG                                    
+          CL                      V1                      V2                    
+                  V3                              Q2                            
+          Q3                                                                    
+                                                                                
+                        THAL     MRT    AREA    AUMC     VSS    IPRE            
+        IRES    IWRE                                                            
+FORM                                                                            
+(E2.0,E3.0,E6.0,E7.0,2E5.0,6E2.0,2E6.0)                                         
+STRC       8   4   1   0   0   1   0   1   0                                    
+THCN       0   0   0   0                                                        
+THTA        0.19      57   0.029    4.95    31.9    88.3    1.69   0.895        
+DIAG      0.1355  0.2786  0.0987  0.3004                                        
+DIAG      0.0151                                                                
+SIML       0   1   0   0   1   0   0   0                                        
+SORC         8675309               0                                            
+TABL       1   1                                                                
+TABL   1  28   2   0   4   0   3   0   6   0   5   0   9   0  11   0  10   0    
+           0  13   0  14   0  22   0  25   0  28   0  32   0  36   0  40   0    
+           0  69   0  70   0  71   0  72   0  60   0  61   0  62   0  63   0    
+           0  64   0  68   0  67   0  65   0                                    
+           0   1   1   0   0                                                    

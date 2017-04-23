@@ -1,0 +1,459 @@
+Control Stream Name: Lee_JPKPD_2016.ctl
+Data File Name: LeeRun1.csv
+Mix File Name: 
+Output File Name: LeeRun1
+Table File Name: sdtab
+Job Started: Wed Jan 25 16:28:01 2017
+Job Completed: Wed Jan 25 16:28:02 2017
+
+**************************************************
+Control Stream Contents : Lee_JPKPD_2016.ctl
+**************************************************
+;Model Desc: 3 CMT IVB LINEAR
+;Project Name: NCAC SIMS
+;Author: BM
+;QC: JK
+;QC2: BM
+;Notes: Scale needed for central compartment with dose in mg
+;       and DV in ng/mL. Also, authors used ADVAN6 but shouldn't
+;       lead to any issues in sim.
+$PROB RUN# 1
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT NTIM NTAD TIME TAD DOSE AMT SS II 
+      DV MDV EVID CMT AGE WTKG
+
+$DATA NMDATA IGNORE=@ ; NMDATA = LeeRun1.csv, LeeRun2.csv
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field
+; AMT:  Intravenous or subcutaneous Dosage Amount Data Item (mg)
+; DV:   Dependent Variable (ng/mL);
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing);
+; AGE:  Age (yr)
+; WTKG: Weight (kg)
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+
+$SUBROUTINE ADVAN11 TRANS4
+
+$PK
+
+   TVCL  = THETA(1)                                              ; POPULATION CLEARANCE
+   GPCL  = TVCL * (WTKG/60)**0.75                                ; ALLOMETRIC WTKG ~ CL
+   IF (AGE.GE.THETA(2)) THEN
+   GP2CL = GPCL * EXP(THETA(3) * (AGE-THETA(2)))                 ; COV AGE >= INF ~ CL
+   ELSE
+   GP2CL = GPCL                                                  ; COV AGE < INF ~ CL
+   ENDIF
+   PPVCL = EXP(ETA(1))
+   CL    = GP2CL * PPVCL                                         ; INDIVIDUAL CLEARANCE
+
+   TVV1   = THETA(4)                                             ; POPULATION CENTRAL VOLUME
+   GPV1   = TVV1 * (WTKG/60)                                       ; ALLOMETRIC WTKG ~ V1
+   V1     = GPV1                                                 ; INDIVIDUAL CENTRAL VOLUME
+
+   TVV2   = THETA(5)                                             ; POPULATION VOLUME 2
+   GPV2   = TVV2 * (WTKG/60)                                       ; ALLOMETRIC WTKG ~ V3
+   V2     = GPV2                                                 ; INDIVIDUAL VOLUME 2
+
+   TVV3   = THETA(6)                                             ; POPULATION VOLUME 3
+   GPV3   = TVV3 * (WTKG/60)                                       ; ALLOMETRIC WTKG ~ V3
+   PPVV3  = EXP(ETA(2))                                          ; BSV VOLUME 3 WTKG
+   V3     = GPV3 * PPVV3                                         ; INDIVIDUAL VOLUME 3
+
+   TVQ2   = THETA(7)                                             ; POPULATION INTERCOMPARTMENTAL CLEARANCE 2 
+   GPQ2   = TVQ2 * (WTKG/60)**0.75                                 ; GROUP INTERCOMPARTMENTAL CLEARANCE 2 WTKG
+   PPVQ2  = EXP(ETA(3))                                          ; BSV INTERCOMPARTMENTAL CLEARANCE 2 WTKG
+   Q2     = GPQ2 * PPVQ2                                         ; INDIVIDUAL INTERCOMPARTMENTAL CLEARANCE 2
+
+   TVQ3   = THETA(8)                                             ; POPULATION INTERCOMPARTMENTAL CLEARANCE 3
+   GPQ3   = TVQ3 * (WTKG/60)**0.75                                 ; GROUP INTERCOMPARTMENTAL CLEARANCE 3 WTKG
+   PPVQ3  = EXP(ETA(4))                                          ; BSV INTERCOMPARTMENTAL CLEARANCE 3 WTKG
+   Q3     = GPQ3 * PPVQ3                                         ; INDIVIDUAL INTERCOMPARTMENTAL CLEARANCE 3
+
+   S1     = V1/1000                                              ; SCALING FACTOR - AMT in mg, DV in ng/mL (ug/L)
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+
+   K10 = CL/V1
+   K12 = Q2/V1
+   K21 = Q2/V2
+   K13 = Q3/V1
+   K31 = Q3/V3
+
+   A0 = K10 * K21 * K31
+   A1 = K10 * K31 + K21 * K31 + K21 * K13 + K10 * K21 + K31 * K12
+   A2 = K10 + K12 + K13 + K21 + K31
+  
+   PPAR = A1 - (A2 * A2 / 3)
+   QPAR = (2 * A2 * A2 * A2 / 27) - (A1 * A2 / 3) + A0
+   G1 = SQRT(-(PPAR * PPAR * PPAR) / 27)
+   PHI = ACOS((-QPAR/2) / G1)/3
+   G2 = 2 * EXP(LOG(G1) / 3)
+   PI = 4 * ATAN(1)
+
+   RT1 = -(COS(PHI) * G2 - A2 / 3)
+   RT2 = -(COS(PHI + 2 * PI/3) * G2 - A2 / 3)
+   RT3 = -(COS(PHI + 4 * PI/3) * G2 - A2 / 3)
+  
+   IF(RT1.LT.RT2.AND.RT1.LT.RT3) L3 = RT1
+   IF(RT2.LT.RT1.AND.RT2.LT.RT3) L3 = RT2
+   IF(RT3.LT.RT1.AND.RT3.LT.RT2) L3 = RT3
+
+   THALF = LOG(2)/L3
+   MRT   = 1/L3
+   AREA  = DOSE/CL
+   AUMC  = AREA*MRT
+   VSS   = V1 + V2 + V3
+
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE=F
+Y    = F + F * EPS(1)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+
+$THETA
+
+.19                                ; TV CLEARANCE (L/HR) CL
+57                                  ; COV AGE INF ~ CL
+
+.029                               ; COV AGE ~ CL
+4.95                                ; TV V1
+31.9                                ; TV V2
+88.3                                ; TV V3
+.69                                ; TV Q2
+
+.895                               ; TV Q3
+ 
+$OMEGA
+
+.1355                              ; [E] BETWEEN SUBJECT VARIABILITY (CL)
+
+.2786                              ; [E] BETWEEN SUBJECT VARIABILITY (V3)
+
+.0987                              ; [E] BETWEEN SUBJECT VARIABILITY (Q2)
+
+.3004                              ; [E] BETWEEN SUBJECT VARIABILITY (Q3)
+
+$SIGMA
+
+.0151                              ; [P] PROPORTIONAL RESIDUAL ERROR
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+
+$SIM ONLYSIM (8675309)
+
+$TABLE                                        ; STANDARD TABLE
+      ID NTIM NTAD TIME TAD DOSE AMT EVID MDV 
+      AGE WTKG
+      CL V1 V2 V3 Q2 Q3 ETA1 ETA2 ETA3 ETA4
+      THALF MRT AREA AUMC VSS
+      IRES IPRE                          ;DV PRED RES WRES - APPENDED
+      NOPRINT ONEHEADER FILE=sdtab
+
+
+Wed Jan 25 16:28:02 EST 2017
+;Model Desc: 3 CMT IVB LINEAR
+;Project Name: NCAC SIMS
+;Author: BM
+;QC: JK
+;QC2: BM
+;Notes: Scale needed for central compartment with dose in mg
+;       and DV in ng/mL. Also, authors used ADVAN6 but shouldn't
+;       lead to any issues in sim.
+$PROB RUN# 1
+
+;************************************************************
+;****                   DATASET                          ****
+;************************************************************
+$INPUT C ID TRT NTIM NTAD TIME TAD DOSE AMT SS II 
+      DV MDV EVID CMT AGE WTKG
+
+$DATA NMDATA IGNORE=@ ; NMDATA = LeeRun1.csv, LeeRun2.csv
+
+; C:    Comment (Any row starting with a 'C' will be ignored)
+; ID:   NONMEM Subject Identification Number 
+; TIME: Actual Time Field
+; AMT:  Intravenous or subcutaneous Dosage Amount Data Item (mg)
+; DV:   Dependent Variable (ng/mL);
+; EVID: Event Identification (0 = Obs, 1 = Dosing)
+; MDV:  Missing Dependent Variable (0 = Value, 1 = Missing);
+; AGE:  Age (yr)
+; WTKG: Weight (kg)
+
+;************************************************************
+;****         PHARMACOKINETIC POPULATION MODEL           ****
+;************************************************************
+
+$SUBROUTINE ADVAN11 TRANS4
+
+$PK
+
+   TVCL  = THETA(1)                                              ; POPULATION CLEARANCE
+   GPCL  = TVCL * (WTKG/60)**0.75                                ; ALLOMETRIC WTKG ~ CL
+   IF (AGE.GE.THETA(2)) THEN
+   GP2CL = GPCL * EXP(THETA(3) * (AGE-THETA(2)))                 ; COV AGE >= INF ~ CL
+   ELSE
+   GP2CL = GPCL                                                  ; COV AGE < INF ~ CL
+   ENDIF
+   PPVCL = EXP(ETA(1))
+   CL    = GP2CL * PPVCL                                         ; INDIVIDUAL CLEARANCE
+
+   TVV1   = THETA(4)                                             ; POPULATION CENTRAL VOLUME
+   GPV1   = TVV1 * (WTKG/60)                                       ; ALLOMETRIC WTKG ~ V1
+   V1     = GPV1                                                 ; INDIVIDUAL CENTRAL VOLUME
+
+   TVV2   = THETA(5)                                             ; POPULATION VOLUME 2
+   GPV2   = TVV2 * (WTKG/60)                                       ; ALLOMETRIC WTKG ~ V3
+   V2     = GPV2                                                 ; INDIVIDUAL VOLUME 2
+
+   TVV3   = THETA(6)                                             ; POPULATION VOLUME 3
+   GPV3   = TVV3 * (WTKG/60)                                       ; ALLOMETRIC WTKG ~ V3
+   PPVV3  = EXP(ETA(2))                                          ; BSV VOLUME 3 WTKG
+   V3     = GPV3 * PPVV3                                         ; INDIVIDUAL VOLUME 3
+
+   TVQ2   = THETA(7)                                             ; POPULATION INTERCOMPARTMENTAL CLEARANCE 2 
+   GPQ2   = TVQ2 * (WTKG/60)**0.75                                 ; GROUP INTERCOMPARTMENTAL CLEARANCE 2 WTKG
+   PPVQ2  = EXP(ETA(3))                                          ; BSV INTERCOMPARTMENTAL CLEARANCE 2 WTKG
+   Q2     = GPQ2 * PPVQ2                                         ; INDIVIDUAL INTERCOMPARTMENTAL CLEARANCE 2
+
+   TVQ3   = THETA(8)                                             ; POPULATION INTERCOMPARTMENTAL CLEARANCE 3
+   GPQ3   = TVQ3 * (WTKG/60)**0.75                                 ; GROUP INTERCOMPARTMENTAL CLEARANCE 3 WTKG
+   PPVQ3  = EXP(ETA(4))                                          ; BSV INTERCOMPARTMENTAL CLEARANCE 3 WTKG
+   Q3     = GPQ3 * PPVQ3                                         ; INDIVIDUAL INTERCOMPARTMENTAL CLEARANCE 3
+
+   S1     = V1/1000                                              ; SCALING FACTOR - AMT in mg, DV in ng/mL (ug/L)
+
+;------------------------------------------------------------
+;----           SECONDARY MODEL PARAMETERS               ----
+;------------------------------------------------------------
+
+   K10 = CL/V1
+   K12 = Q2/V1
+   K21 = Q2/V2
+   K13 = Q3/V1
+   K31 = Q3/V3
+
+   A0 = K10 * K21 * K31
+   A1 = K10 * K31 + K21 * K31 + K21 * K13 + K10 * K21 + K31 * K12
+   A2 = K10 + K12 + K13 + K21 + K31
+  
+   PPAR = A1 - (A2 * A2 / 3)
+   QPAR = (2 * A2 * A2 * A2 / 27) - (A1 * A2 / 3) + A0
+   G1 = SQRT(-(PPAR * PPAR * PPAR) / 27)
+   PHI = ACOS((-QPAR/2) / G1)/3
+   G2 = 2 * EXP(LOG(G1) / 3)
+   PI = 4 * ATAN(1)
+
+   RT1 = -(COS(PHI) * G2 - A2 / 3)
+   RT2 = -(COS(PHI + 2 * PI/3) * G2 - A2 / 3)
+   RT3 = -(COS(PHI + 4 * PI/3) * G2 - A2 / 3)
+  
+   IF(RT1.LT.RT2.AND.RT1.LT.RT3) L3 = RT1
+   IF(RT2.LT.RT1.AND.RT2.LT.RT3) L3 = RT2
+   IF(RT3.LT.RT1.AND.RT3.LT.RT2) L3 = RT3
+
+   THALF = LOG(2)/L3
+   MRT   = 1/L3
+   AREA  = DOSE/CL
+   AUMC  = AREA*MRT
+   VSS   = V1 + V2 + V3
+
+;------------------------------------------------------------
+;----               RESIDUAL ERROR MODEL                 ----
+;------------------------------------------------------------
+$ERROR
+
+IPRE=F
+Y    = F + F * EPS(1)
+IRES = DV-IPRE
+IWRE = IRES/IPRE
+
+;************************************************************
+;****           INITIAL PARAMETER ESTIMATES              ****
+;************************************************************
+
+$THETA
+
+.19                                ; TV CLEARANCE (L/HR) CL
+57                                  ; COV AGE INF ~ CL
+
+.029                               ; COV AGE ~ CL
+4.95                                ; TV V1
+31.9                                ; TV V2
+88.3                                ; TV V3
+.69                                ; TV Q2
+
+.895                               ; TV Q3
+ 
+$OMEGA
+
+.1355                              ; [E] BETWEEN SUBJECT VARIABILITY (CL)
+
+.2786                              ; [E] BETWEEN SUBJECT VARIABILITY (V3)
+
+.0987                              ; [E] BETWEEN SUBJECT VARIABILITY (Q2)
+
+.3004                              ; [E] BETWEEN SUBJECT VARIABILITY (Q3)
+
+$SIGMA
+
+.0151                              ; [P] PROPORTIONAL RESIDUAL ERROR
+
+;************************************************************
+;****        ESTIMATION AND SIMULATION ROUTINES          ****
+;************************************************************
+
+$SIM ONLYSIM (8675309)
+
+$TABLE                                        ; STANDARD TABLE
+      ID NTIM NTAD TIME TAD DOSE AMT EVID MDV 
+      AGE WTKG
+      CL V1 V2 V3 Q2 Q3 ETA1 ETA2 ETA3 ETA4
+      THALF MRT AREA AUMC VSS
+      IRES IPRE                          ;DV PRED RES WRES - APPENDED
+      NOPRINT ONEHEADER FILE=sdtab
+
+
+
+
+NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM)    DOUBLE PRECISION NONMEM    VERSION VI LEVEL 1.0  
+DEVELOPED AND PROGRAMMED BY STUART BEAL AND LEWIS SHEINER
+
+PROBLEM NO.:         1
+RUN# 1                                                                  
+
+DATA CHECKOUT RUN:              NO 
+DATA SET LOCATED ON UNIT NO.:    2
+THIS UNIT TO BE REWOUND:        NO 
+NO. OF DATA RECS IN DATA SET:  275
+NO. OF DATA ITEMS IN DATA SET:  17
+ID DATA ITEM IS DATA ITEM NO.:   2
+DEP VARIABLE IS DATA ITEM NO.:  12
+MDV DATA ITEM IS DATA ITEM NO.: 13
+
+INDICES PASSED TO SUBROUTINE PRED:
+14  6  9  0 10 11 15  0  0
+ 0  0
+
+LABELS FOR DATA ITEMS:
+   C      ID     TRT    NTIM    NTAD    TIME     TAD    DOSE     AMT
+  SS      II      DV     MDV    EVID     CMT     AGE    WTKG
+
+(NONBLANK) LABELS FOR PRED-DEFINED ITEMS:
+  CL      V1      V2      V3      Q2      Q3    THAL     MRT    AREA
+AUMC     VSS    IPRE    IRES
+
+FORMAT FOR DATA:
+(E2.0,E3.0,E2.0,2E6.0,2E7.0,2E5.0,6E2.0,2E6.0)                                  
+
+TOT. NO. OF OBS RECS:     250
+TOT. NO. OF INDIVIDUALS:   25
+
+LENGTH OF THETA:  8
+
+OMEGA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  4
+
+SIGMA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:  1
+
+INITIAL ESTIMATE OF THETA:
+  0.1900E+00  0.5700E+02  0.2900E-01  0.4950E+01  0.3190E+02  0.8830E+02  0.1690E+01  0.8950E+00
+
+INITIAL ESTIMATE OF OMEGA:
+0.1355E+00
+0.0000E+00   0.2786E+00
+0.0000E+00   0.0000E+00   0.9870E-01
+0.0000E+00   0.0000E+00   0.0000E+00   0.3004E+00
+
+INITIAL ESTIMATE OF SIGMA:
+0.1510E-01
+
+SIMULATION STEP OMITTED:    NO 
+OBJ FUNC EVALUATED:         NO 
+SOURCE  1:
+   SEED1:       8675309   SEED2:             0   PSEUDO-NORMAL       
+
+TABLES STEP OMITTED:    NO 
+NO. OF TABLES:           1
+
+-- TABLE  1 --
+PRINTED:                NO 
+HEADER:                YES 
+FILE TO BE FORWARDED:   NO 
+
+USER-CHOSEN ITEMS 
+IN THE ORDER THEY WILL APPEAR IN THE TABLE:
+  ID    NTIM    NTAD    TIME     TAD    DOSE     AMT    EVID     MDV     AGE    WTKG      CL      V1      V2      V3
+  Q2      Q3    ETA1    ETA2    ETA3    ETA4    THAL     MRT    AREA    AUMC     VSS    IRES    IPRE
+DOUBLE PRECISION PREDPP VERSION V LEVEL 1.0  
+
+THREE COMPARTMENT MODEL (ADVAN11)
+
+MAXIMUM NO. OF BASIC PK PARAMETERS:   6
+
+BASIC PK PARAMETERS (AFTER TRANSLATION):
+  BASIC PK PARAMETER NO.  1: ELIMINATION RATE (K)
+  BASIC PK PARAMETER NO.  2: CENTRAL-TO-PERIPH1 RATE (K12)
+  BASIC PK PARAMETER NO.  3: PERIPH1-TO-CENTRAL RATE (K21)
+  BASIC PK PARAMETER NO.  4: CENTRAL-TO-PERIPH2 RATE (K13)
+  BASIC PK PARAMETER NO.  5: PERIPH2-TO-CENTRAL RATE (K31)
+TRANSLATOR WILL CONVERT PARAMETERS 
+CL, V1, Q2, V2, Q3, V3 TO K, K12, K21, K13, K31 (TRANS4)
+
+COMPARTMENT ATTRIBUTES 
+COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                        STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+   1         CENTRAL      ON         NO         YES        YES        YES
+   2         PERIPH1      ON         NO         YES        NO         NO 
+   3         PERIPH2      ON         NO         YES        NO         NO 
+   4         OUTPUT       OFF        YES        NO         NO         NO 
+
+ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+COMPT. NO.                             INDICES
+             SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                        FRACTION    RATE        DURATION    LAG  
+   1           7           *           *           *           *
+   2           *           *           *           *           *
+   3           *           *           *           *           *
+   4           *           -           -           -           -
+            - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+            * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+              WILL DEFAULT TO ONE IF APPLICABLE
+
+DATA ITEM INDICES USED BY PRED ARE:
+  EVENT ID DATA ITEM IS DATA ITEM NO.:     14
+  TIME DATA ITEM IS DATA ITEM NO.:          6
+  DOSE AMOUNT DATA ITEM IS DATA ITEM NO.:   9
+  STEADY STATE DATA ITEM IS DATA ITEM NO.: 10
+  INTERVAL DATA ITEM IS DATA ITEM NO.:     11
+  COMPT. NO. DATA ITEM IS DATA ITEM NO.:   15
+
+
+PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+
+ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+
+SIMULATION STEP PERFORMED
+SOURCE  1:
+   SEED1:     584930008   SEED2:   -1104221022
+Wed Jan 25 16:28:02 EST 2017

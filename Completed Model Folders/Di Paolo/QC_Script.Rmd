@@ -1,0 +1,111 @@
+---
+title: "Di Paolo Single Dose Run 1"
+author: "BM"
+date: "February 5, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+setwd("L:/Clinical PK/NCAC/Completed Model Folders/")
+
+###CHANGE THIS
+file = "Di Paolo/sdtab1.txt"
+
+##PICK ONE - Josh (TOP), Brian (Bot)
+# sdtab = read.table(file, header=T, sep="", skip=1, as.is = T)
+sdtab = read.table(file, header=T, sep="", as.is = T)
+
+knitr::opts_chunk$set(echo = FALSE, fig.width=6, fig.height = 4, warning=F)
+
+library(ggplot2)
+library(dplyr)
+
+lloqTable = read.csv("L:/Clinical PK/NCAC/LLOQ.csv", header=T, as.is = T)
+author = unlist(strsplit(file,"/"))[1]
+lloq = lloqTable$LLOQ[lloqTable$Author == author]
+
+obs = filter(sdtab, AMT == 0)
+
+neg = round(sum(obs$DV<0)/length(obs$DV), 4)*100
+n = length(unique(obs$ID))
+mtime = max(obs$TIME)
+```
+
+## NCA Consortium Dataset QC
+# Author: `r author`
+# File Path: `r file`
+
+# Number of Subjects: `r n`
+# Maximum Time: `r mtime`
+# LLOQ: `r lloq`
+# Percent of Negative Observations: `r neg`% 
+
+\newpage
+
+```{r plot1}
+ggplot(data = obs, aes(x=TIME, y=DV)) +
+  geom_point() +
+  geom_hline(aes(yintercept = lloq), color="red", linetype=2) +
+  theme_bw() +
+  labs(title=("DV vs. TIME - Point"))
+```
+&nbsp;
+&nbsp;
+```{r plot2}
+ggplot(data = obs, aes(x=TIME, y=DV, color=as.factor(ID))) +
+  geom_line() +
+  geom_hline(aes(yintercept = lloq), color="red", linetype=2) +
+  theme_bw() +
+  theme(legend.position="none") +
+  labs(title=("\n\n Log DV vs. TIME - Line"))
+```
+
+```{r plot3}
+ggplot(data = obs, aes(x=TIME, y=DV)) +
+  geom_point() + 
+  geom_hline(aes(yintercept = lloq), color="red", linetype=2) +
+  scale_y_log10() +
+  theme_bw() +
+  labs(title=("DV vs. TIME - Point"))
+```
+&nbsp;
+&nbsp;
+```{r plot4}
+ggplot(data = obs, aes(x=TIME, y=DV, color=as.factor(ID))) +
+  geom_line() +
+  geom_hline(aes(yintercept = lloq), color="red", linetype=2) +
+  scale_y_log10() +
+  theme_bw() +
+  theme(legend.position="none") +
+  labs(title=("\n\n Log DV vs. TIME - Line"))
+```
+
+```{r plot5, echo=F}
+if("NTIM" %in% names(obs)) {names(obs)[names(obs) == "NTIM"] = "TIME2"
+} else if("TIME" %in% names(obs)) {names(obs)[names(obs) == "TIME"] = "TIME2"}
+
+grouped = group_by(obs, TIME2)
+average = summarize(grouped, mean(DV), sd(DV))
+names(average) = c("TIME2", "MEAN", "SD")
+
+ggplot(data=average, aes(x=TIME2, y=MEAN)) +
+  geom_line() +
+  geom_point() +
+  geom_hline(aes(yintercept = lloq), color="red", linetype=2) +
+  geom_errorbar(aes(ymin=MEAN-SD, ymax=MEAN+SD), width=3) +
+  theme_bw() +
+  labs(title=("Mean DV+/-SD vs. TIME - Line"))
+```
+<br>
+<br>
+```{r plot6, echo=F}
+ggplot(data=average, aes(x=TIME2, y=MEAN)) +
+  geom_line() +
+  geom_point() +
+  geom_hline(aes(yintercept = lloq), color="red", linetype=2) +
+  geom_errorbar(aes(ymin=MEAN-SD, ymax=MEAN+SD), width=3) +
+  theme_bw() +
+  scale_y_log10() +
+  labs(title=("\n\n Log Mean DV+/-SD vs. TIME - Line"))
+
+```
